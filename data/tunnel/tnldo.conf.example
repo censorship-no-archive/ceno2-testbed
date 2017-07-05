@@ -1,0 +1,53 @@
+// VPNs and tunnels to be tried by ``tnldo`` to run the given command.
+//
+// Each entry is tried in order.
+// In this example, all addresses of the same server are tried first
+// before proceeding to the next server.
+// You may try different groupings (e.g. by VPN or tunnel type).
+//
+// Please remember to remove comments since
+// they are not supported by standard JSON.
+[
+  // A first VPN/tunnel server.
+  {  // permanent cjdns
+   "addr": "SERVER1_CJDNS_ADDRESS",  // the address to be used by the command
+   "start": "service cjdns restart",  // command to start VPN if address is missing
+   "stop": "true"  // command to stop the VPN when the command is done
+  },
+  {  // permanent OnionCat
+   "addr": "SERVER1_ONIONCAT_ADDRESS",
+   "start": "service onioncat restart", "stop": "true"},
+  {  // temporary OpenVPN with ``tnl``
+   "addr": "SERVER1_OPENVPN_ADDRESS",
+   "start": "tnl start ovpn SERVER1_PUBLIC_ADDRESS SERVER1_OPENVPN_PORT",
+   "stop": "tnl stop $(cat $TNL_START_OUT)"},
+  {  // temporary PPP over SSH with ``tnl``
+   "addr": "SERVER1_PPPSSH_ADDRESS",
+   "start": "tnl start pppssh SERVER1_PUBLIC_ADDRESS SERVER1_SSH_PORT",
+   "stop": "tnl stop $(cat $TNL_START_OUT)"},
+  {  // temporary PPP over TLS with ``tnl``
+   "addr": "SERVER1_PPPTLS_ADDRESS",
+   "start": "tnl start ppptls  SERVER1_PUBLIC_ADDRESS SERVER1_TLS_PORT",
+   "stop": "tnl stop $(cat $TNL_START_OUT)"},
+
+  // The same with a second VPN/tunnel server.
+  {"addr": "SERVER2_CJDNS_ADDRESS",
+   "start": "service cjdns restart", "stop": "true"},
+  {"addr": "SERVER2_ONIONCAT_ADDRESS",
+   "start": "service onioncat restart", "stop": "true"},
+  {"addr": "SERVER2_OPENVPN_ADDRESS",
+   "start": "tnl start ovpn SERVER2_PUBLIC_ADDRESS SERVER2_OPENVPN_PORT",
+   "stop": "tnl stop $(cat $TNL_START_OUT)"},
+  {"addr": "SERVER2_PPPSSH_ADDRESS",
+   "start": "tnl start pppssh SERVER2_PUBLIC_ADDRESS SERVER2_SSH_PORT",
+   "stop": "tnl stop $(cat $TNL_START_OUT)"},
+  {"addr": "SERVER2_PPPTLS_ADDRESS",
+   "start": "tnl start ppptls  SERVER2_PUBLIC_ADDRESS SERVER2_TLS_PORT",
+   "stop": "tnl stop $(cat $TNL_START_OUT)"},
+
+  // A last resort public address.
+  {"addr": "SERVER1_PUBLIC_ADDRESS",
+   "start": "false",  // fail if missing
+   "stop": "true"  // leave it up
+  }
+]

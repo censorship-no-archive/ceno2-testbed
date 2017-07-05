@@ -1,0 +1,49 @@
+---
+
+- name: Install packages necessary for tunnel scripts
+  apt: pkg={{item}} state=installed
+  with_items:
+    - uuid-runtime
+    - jq
+    - wget
+    - cron
+
+- name: Create some directories in /usr/local
+  file: path=/usr/local/{{item}} state=directory owner=root group=root mode=0755
+  with_items:
+    - etc
+    - bin
+    - sbin
+
+- name: Create tunnel datadir
+  file: name=/var/local/lib/tnl/log state=directory owner=root group=root mode=0755
+
+- name: Copy tunnel scripts
+  copy: src={{item}} dest=/usr/local/sbin/{{item}} owner=root group=root mode=0755
+  with_items:
+    - tnl
+    - tnlvars.sh
+    - tnldo
+
+- name: Copy tunnel JSON configuration
+  copy: src=tnldo.conf dest=/usr/local/etc/tnldo.conf owner=root group=root mode=0600
+
+- name: Install crontab script
+  template: src=report-addrs.cron-hourly.j2 dest=/etc/cron.hourly/report-addrs owner=root group=root mode=0755
+
+- name: Run crontab script on boot
+  lineinfile:
+    dest: /etc/rc.local
+    line: '/etc/cron.hourly/report-addrs'
+    insertbefore: '^exit 0'
+
+- name: Install private files (certificates and SSH keys)
+  copy: src={{item}} dest=/var/local/lib/tnl/{{item}} owner=root group=root mode=0600
+  with_items:
+    - ca.crt.pem
+    - client.crt.pem
+    - client.key.pem
+    - pppclient
+
+- name: Create root's .ssh directory
+  file: path=/root/.ssh state=directory owner=root group=root mode=0700

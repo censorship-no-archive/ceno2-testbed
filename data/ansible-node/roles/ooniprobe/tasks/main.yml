@@ -1,0 +1,237 @@
+---
+
+- name: Install libssl1.0.0
+  apt: pkg=libssl1.0.0 state=installed
+
+- name: Query libssl1.0.0 version
+  command: dpkg-query -W -f='${Version}' libssl1.0.0
+  register: libssl_version
+
+- name: Force install of libssl-dev from backports if libssl1.0.0 is also from backports
+  apt: pkg=libssl-dev state=installed default_release=jessie-backports
+  when: '"bpo8" in libssl_version.stdout'
+
+- name: Install virtualenv package and other dependencies
+  apt: pkg={{item}} state=installed
+  with_items:
+    - python-virtualenv
+    - git
+    - build-essential
+    - libdumbnet-dev
+    - libpcap-dev
+    - libgeoip-dev
+    - libffi-dev
+    - python-dev
+    - libssl-dev
+    - geoip-database
+    - geoip-database-extra
+    - gnupg2
+    - cmake
+    - libevent-dev
+    - libcurl4-openssl-dev
+
+- name: Check version of our transmission installation in our ansible tree
+  set_fact:
+    wanted_transmission_setup_version: "{{lookup('file', 'p2p-test-tag')}}"
+    installed_transmission_setup_version: ""
+    must_update_p2ptest: false
+
+- name: Check version of currently installed transmission installation
+  set_fact:
+    installed_transmission_setup_version: "{{lookup('file', '/opt/transmission/p2p-test-tag')}}"
+  ignore_errors: true
+
+- name: Check if our transmission binary is present
+  command: /opt/transmission/bin/transmission-cli --version
+  register: transtest
+  ignore_errors: True
+
+- name: Set p2p test update flag
+  set_fact:
+    must_update_p2ptest: true
+  when: '(wanted_transmission_setup_version != installed_transmission_setup_version) or (transtest | failed)'
+
+- name: Copy p2p-test directory
+  copy: src=p2p-test dest=/root/
+  when: must_update_p2ptest
+
+- name: Build transmission
+  command: sh build-transmission.sh
+  args:
+    chdir: /root/p2p-test
+  when: must_update_p2ptest
+
+- name: Clean up build directory
+  file: path=/root/p2p-test state=absent
+  when: must_update_p2ptest
+
+- name: Copy p2p test version tag file
+  copy: src=p2p-test-tag dest=/opt/transmission/p2p-test-tag mode=0644
+
+- name: Ensure that p2p test run script is executable
+  file: path=/opt/transmission/run-test.sh mode=0755
+
+- name: Create venv folder
+  file: path=/root/venvs state=directory
+
+- name: Create folder ooniprobe building folder
+  file: path=/root/ooniprobe-git/ state=directory
+
+- name: Copy git repository of ooniprobe
+  git:
+    repo: https://github.com/vmon/ooni-probe
+    dest: /root/ooniprobe-git/
+    version: aef544c11bb52174f54ba76a29fdaa637781a522
+
+- name: Install some python dependencies that ooniprobe does not seem to know about
+  pip:
+    name: "{{item}}"
+    state: present
+    virtualenv: /root/venvs/ooniprobe
+    virtualenv_site_packages: no
+  with_items:
+    - packaging
+    - appdirs
+
+- name: Force version 0.18 of txtorcon
+  pip:
+    name: txtorcon
+    version: "0.18"
+    virtualenv: /root/venvs/ooniprobe
+    virtualenv_site_packages: no
+
+- name: Force latest version of Twisted
+  pip:
+    name: Twisted
+    state: latest
+    virtualenv: /root/venvs/ooniprobe
+    virtualenv_site_packages: no
+
+- name: Install python dependencies from ooniprobe's requirements.txt
+  pip:
+    requirements: /root/ooniprobe-git/requirements.txt
+    state: present
+    virtualenv: /root/venvs/ooniprobe
+    virtualenv_site_packages: no
+
+- name: Install ooniprobe into Python venv
+  command: /root/venvs/ooniprobe/bin/python setup.py install
+  args:
+    chdir: /root/ooniprobe-git
+
+- name: Create some ooni directories in python venv
+  file: path=/root/venvs/ooniprobe/{{item}} state=directory
+  with_items:
+    - var/lib/ooni
+    - var/lib/ooni/resources/maxmind-geoip
+
+- name: Use system GeoIP databases (if missing)
+  file:
+    state: link
+    src: /usr/share/GeoIP/{{item}}
+    dest: /root/venvs/ooniprobe/var/lib/ooni/resources/maxmind-geoip/{{item}}
+  with_items:
+    - GeoIP.dat
+    - GeoIPv6.dat
+    - GeoIPASNum.dat
+    - GeoIPCity.dat
+  ignore_errors: true
+
+- name: Copy ooniprobe.conf
+  copy: src=ooniprobe.conf dest=/root/venvs/ooniprobe/var/lib/ooni/ooniprobe.conf mode=0644
+
+- name: Touch initialized file
+  file: path=/root/venvs/ooniprobe/var/lib/ooni/initialized state=touch mode=0644
+
+- name: Remove default deck files
+  file: path=/root/venvs/ooniprobe/var/lib/ooni/decks-enabled/{{item}} state=absent
+  with_items:
+    - http-invalid.yaml
+    - im.yaml
+    - tor.yaml
+    - web.yaml
+
+- name: Copy ooniconf.sh to /usr/local/etc/
+  template: src=ooniconf.sh.j2 dest=/usr/local/etc/ooniconf.sh owner=root group=root mode=0700
+
+- name: Copy ooniprobe task shell scripts
+  copy: src={{item}} dest=/usr/local/bin/{{item}} owner=root group=root mode=0755
+  with_items:
+    - op-peer_locator.sh
+    - op-peer_http_reachable.sh
+    - op-p2p_bittorrent.sh
+
+- name: Set daily cron task for peer locator
+  cron:
+    name: ooniprobe peer locator
+    job: /usr/local/bin/op-peer_locator.sh
+    cron_file: ooniprobe_peer_locator
+    state: present
+    special_time: daily
+    user: root
+
+- name: Set UTC time condition for peer_http_reachable OONI test
+  set_fact:
+    peer_http_reachable_condition: "[ $(date -u \\%H\\%M) = {{op_schedule.peer_http_reachable.fixed_utc}} ] && "
+  when: op_schedule.peer_http_reachable.fixed_utc is defined
+
+- name: Set cron task for http reachability test
+  cron:
+    name: ooniprobe http reachability
+    job: "{{peer_http_reachable_condition|default('')}}/usr/local/bin/op-peer_http_reachable.sh"
+    cron_file: ooniprobe_http_reachable
+    state: present
+    hour: "{{op_schedule.peer_http_reachable.hour|default('*')}}"
+    minute: "{{op_schedule.peer_http_reachable.minute|default('*')}}"
+    user: root
+
+- name: Set UTC time condition for p2p_bittorrent OONI test
+  set_fact:
+    p2p_bittorrent_condition: "[ $(date -u \\%H\\%M) = {{op_schedule.p2p_bittorrent.fixed_utc}} ] && "
+  when: op_schedule.p2p_bittorrent.fixed_utc is defined
+
+- name: Set cron task for p2p test
+  cron:
+    name: ooniprobe p2p test
+    job: "{{p2p_bittorrent_condition|default('')}}/usr/local/bin/op-p2p_bittorrent.sh"
+    cron_file: ooniprobe_p2p_bittorrent
+    state: present
+    hour: "{{op_schedule.p2p_bittorrent.hour|default('*')}}"
+    minute: "{{op_schedule.p2p_bittorrent.minute|default('*')}}"
+    user: root
+
+- name: Parse our PGP public key file
+  shell: gpg --fixed-list-mode --with-fingerprint --with-colons roles/ooniprobe/files/ooni-backup-pub.asc | sed -E '/^fpr/!d;s/^fpr:+([0-9A-F]{40}):$/\1/;q'
+  register: pubfpr_cmd
+
+- name: Register our PGP public key fingerprint
+  set_fact:
+    pubkey_fpr: "{{pubfpr_cmd.stdout}}"
+
+- name: Check whether root knows the backup PGP key
+  command: gpg --list-keys {{pubkey_fpr}}
+  ignore_errors: True
+  register: hazkey
+
+- name: Upload key file
+  copy: src=ooni-backup-pub.asc dest=/root/ooni-backup-pub.asc
+  when: hazkey | failed
+
+- name: Import PGP key
+  command: gpg --import /root/ooni-backup-pub.asc
+  when: hazkey | failed
+
+- name: Remove key file
+  file: path=/root/ooni-backup-pub.asc state=absent
+  when: hazkey | failed
+
+- name: Copy file with key ID
+  copy: content="{{pubkey_fpr}}" dest=/root/ooni-backup-key.id
+
+- name: Add daily cron job for oonireport
+  template:
+    src: ooniprobe.cron-daily.j2
+    dest: /etc/cron.daily/ooniprobe
+    owner: root
+    group: root
+    mode: "0755"

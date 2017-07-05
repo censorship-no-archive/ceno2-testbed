@@ -1,0 +1,3 @@
+This is the script that is downloaded and executed hourly by nodes.
+
+Please drop it in the server as ``/var/www/server.testbed/addrs/index.txt``.

@@ -1,0 +1,2 @@
+# Allow www-data to update Tor bridges.
+www-data	ALL = (root) NOPASSWD: /usr/bin/tee /etc/tor/torrc, /usr/sbin/service tor restart

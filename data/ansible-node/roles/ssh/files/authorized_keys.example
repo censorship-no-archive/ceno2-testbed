@@ -1,0 +1,10 @@
+# Keys allowed to log into all nodes as root.
+#
+# Be careful with what keys you list in this file!
+#
+# Usually this will contain at least the public key of the testbed administrator,
+# but maybe also the public keys of other individual admins.
+
+ssh-rsa TESTBED_ADMIN_PUBLIC_KEY admin@testbed
+ssh-rsa ADMIN1_PUBLIC_KEY foo@example.com
+ssh-rsa ADMIN2_PUBLIC_KEY bar@example.com

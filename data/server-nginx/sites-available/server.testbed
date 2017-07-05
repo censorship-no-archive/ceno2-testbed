@@ -1,0 +1,17 @@
+server {
+	listen	80;
+	listen	[::]:80;
+	listen	443 ssl;
+	listen	[::]:443 ssl;
+
+	server_name server.testbed ;
+
+        access_log /var/log/nginx/vhost-server.testbed/access.log main;
+        error_log /var/log/nginx/vhost-server.testbed/error.log;
+
+	expires -1;
+
+	root /var/www/server.testbed;
+
+	include /etc/nginx/includes/server.testbed/*;
+}

@@ -1,0 +1,157 @@
+#!/bin/sh
+#
+# Requires ``jq``.
+
+set -e
+
+CONF_FILE=${CONF_FILE:-/usr/local/etc/tnldo.conf}
+PING_RETRIES=3
+PING_TIMEOUT=10  # seconds
+
+is_alive() {
+    local ping
+    if echo "$addr" | grep -q ':'; then
+        ping=ping6
+    else
+        ping=ping
+    fi
+    local i
+    # Retry manually since the iface may not exist yet.
+    for i in $(seq $PING_RETRIES); do
+        if $ping -c1 -W$PING_TIMEOUT "$1" > /dev/null 2>&1; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Returns 0 if there is a non-default route to the given address.
+has_route() {
+    local out_if=$(ip r g "$1" | sed -En 's/.*\bdev ([^ ]+)\b.*/\1/p')
+    ! echo "$DEFAULT_IFS" | grep -q "\b$out_if\b"
+}
+
+# Put the given command in a script file and run it, exit successfully.
+run_script() {
+    local cmd="$1"
+    local cmd_file=$(mktemp)
+    echo '#!/bin/sh' >> "$cmd_file"
+    echo "$cmd" >> "$cmd_file"
+    echo 'exit 0' >> "$cmd_file"  # force successful exit
+    env TNL_START_OUT="$TNL_START_OUT" sh "$cmd_file"
+    rm -f "$cmd_file"
+}
+
+# Starts the tunnel (by index) and copies stdout to the ``$TNL_START_OUT`` file.
+start_tunnel() {
+    local start_cmd="$(jq -r ".[$TUNNEL_INDEX].start" "$CONF_FILE")"
+    TNL_START_OUT=$(mktemp)
+    run_script "$start_cmd" | tee "$TNL_START_OUT"
+}
+
+# Stops the tunnel (by index) and removes the ``$TNL_START_OUT`` file.
+stop_tunnel() {
+    local stop_cmd="$(jq -r ".[$TUNNEL_INDEX].stop" "$CONF_FILE")"
+    run_script "$stop_cmd"
+    rm -f "$TNL_START_OUT"
+}
+
+# Show usage.
+if [ "$1" = '--help' ]; then
+    cat << 'EOF'
+Usage: tnldo COMMAND [ARG]...
+
+Run the given command against the first tunnel address that works,
+or print that address if no command is given.  The command gets
+the following environment variables:
+
+  - TNL_ADDR: working remote IP address
+  - TNL_ADDR_BKT: same IP address, between brackets if IPv6
+  - TNL_VER: "4" or "6" depending on whether the address is IPv4 or IPv6
+  - TNL_OPT: "-6" if the address is IPv6, empty otherwise
+  - TNL_6: "6" if the address is IPv6, empty otherwise
+
+Example: ``tnldo sh -c 'scp foo.bar foo@$TNL_ADDR_BKT:/tmp'``
+
+Sample configuration file with addresses to be tested listed in order
+(``start`` and ``stop`` are shell commands to start and stop the given
+tunnel):
+
+```json
+[
+  {"addr": "1.2.3.4",  // a normal IP address, no start or stop needed
+   "start": "true", "stop": "true"},
+  {"addr": "fc12:3456:...:abcd",  // an address provided by a service
+   "start": "service cjdns restart", "stop": "true"},
+  {"addr": "10.0.0.1",  // a temporary tunnel
+   "start": "tnl start ovpn 5.6.7.8 443",
+   "stop": "tnl stop $(cat $TNL_START_OUT)"}
+]
+```
+
+Where ``$TNL_START_OUT`` is the name of a file that contains a copy of
+the standard output of the start command.
+
+EOF
+    exit 0
+fi
+
+# Get default interfaces.  If traffic going to a tunnel address
+# exits a default interface, the tunnel is supposed to be down.
+DEFAULT_IFS="$({ ip -4 r; ip -6 r; } | sed -En 's/^default\b.*\bdev ([^ ]+)\b.*/\1/p')"
+
+# Check for first available address (entries are ``IDX#ADDR``).
+for entry in $(jq -r '.|to_entries|.[]|[(.key|tostring), .value.addr]|join("#")' "$CONF_FILE"); do
+    TUNNEL_INDEX=${entry%%#*}
+    addr=${entry#*#}
+    TUNNEL_STARTED=no
+    if ! has_route "$addr"; then
+        # No non-default route to address, start tunnel.
+        start_tunnel "$TUNNEL_INDEX"
+        TUNNEL_STARTED=yes
+    fi
+    if is_alive "$addr"; then
+        TNL_ADDR="$addr"
+        break
+    elif [ "$TUNNEL_STARTED" = yes ]; then
+        # Tunnel was started on purpose, stop it.
+        stop_tunnel "$TUNNEL_INDEX"
+    fi
+done
+
+# No working address found.
+if [ ! "$TNL_ADDR" ]; then
+    echo "$(basename "$0"): no working address for command" >&2
+    exit 1
+fi
+
+# Set protocol version, option and address.
+if echo "$TNL_ADDR" | grep -q ':'; then
+    TNL_VER=6
+    TNL_OPT=-6
+    TNL_6=6
+    TNL_ADDR_BKT="[$TNL_ADDR]"
+else
+    TNL_VER=4
+    TNL_OPT=
+    TNL_6=
+    TNL_ADDR_BKT="$TNL_ADDR"
+fi
+
+# Perform the action.
+result=0
+if [ "$1" ]; then
+    # Run the given command.
+    env TNL_VER="$TNL_VER" TNL_OPT="$TNL_OPT" TNL_6="$TNL_6" TNL_ADDR="$TNL_ADDR" TNL_ADDR_BKT="$TNL_ADDR_BKT" "$@" \
+        || result=1
+else
+    # No command given, just show working address.
+    echo "$TNL_ADDR"
+fi
+
+if [ "$TUNNEL_STARTED" = yes ]; then
+    # Tunnel was started on purpose, stop it.
+    stop_tunnel "$TUNNEL_INDEX"
+fi
+
+exit $result

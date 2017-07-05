@@ -1,0 +1,8 @@
+---
+
+- name: Install packages for PPP tunnel client
+  apt: pkg={{item}} state=installed
+  with_items:
+    - ppp
+    - stunnel4
+

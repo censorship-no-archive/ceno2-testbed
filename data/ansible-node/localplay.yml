@@ -1,0 +1,13 @@
+---
+
+- hosts: localhost
+  roles:
+    - base-packages
+    - ssh
+    - openvpn-client
+    - ppptunnel-client
+    - cjdns
+    - tor
+    - tnlscripts
+    - ooniprobe
+    - maintenance

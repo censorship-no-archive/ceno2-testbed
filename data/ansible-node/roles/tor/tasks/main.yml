@@ -1,0 +1,20 @@
+---
+
+- name: Install tor and related packages
+  apt: pkg={{item}} state=installed
+  with_items:
+    - tor
+    - obfs4proxy
+    - obfsproxy
+    - onioncat
+
+- name: Install torrc
+  template: src=torrc.j2 dest=/etc/tor/torrc owner=root group=root mode=0644
+  notify:
+    - restart tor
+
+- name: Install onioncat Debian default file
+  copy: src=onioncat-default dest=/etc/default/onioncat owner=root group=root mode=0644
+  notify:
+    - restart onioncat
+

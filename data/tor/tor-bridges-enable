@@ -1,0 +1,37 @@
+#!/bin/sh
+# Enable ``Bridge`` lines in Tor from the given file.
+
+set -e
+
+progname=$(basename "$0")
+if [ $# -ne 1 ]; then
+    echo "Usage: $progname BRIDGES_FILE" >&2
+    exit 1
+fi
+
+TORRC=/etc/tor/torrc
+TORRC_NEW=$(mktemp)
+BRIDGES="$(realpath -e "$1")"  # fail if missing
+
+(
+    sed '/^### BRIDGES ###$/,$d' "$TORRC"
+    cat <<- EOF
+	### BRIDGES ###
+	# All lines after the previous one may be overwritten!
+	UseBridges 0
+	ClientTransportPlugin obfs2,obfs3 exec /usr/bin/obfsproxy managed
+	ClientTransportPlugin obfs4 exec /usr/bin/obfs4proxy
+
+	$(grep '^Bridge\b' "$BRIDGES")
+	EOF
+) > "$TORRC_NEW"
+
+if grep -q '^Bridge\b' "$TORRC_NEW"; then
+    # There are bridges, activate them.
+    sed -i 's/^UseBridges 0$/UseBridges 1/' "$TORRC_NEW"
+fi
+
+cp "$TORRC" "$(mktemp /tmp/torrc-backup.XXXX)"
+sudo tee "$TORRC" < "$TORRC_NEW" > /dev/null
+sudo /usr/sbin/service tor restart
+rm "$TORRC_NEW"

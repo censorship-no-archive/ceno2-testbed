@@ -1,0 +1,20 @@
+#!/bin/sh
+# Please install to ``/usr/local/sbin/testbed-update-data-pack``
+# and run as ``root`` with a ``crontab`` entry that
+# first sets the appropriate configuration variables.
+
+ADMIN_SCRIPT=${ADMIN_SCRIPT:-/usr/local/bin/testbed-admin}
+WEB_DIR=${WEB_DIR:-/var/www/testbed/data}
+WEB_USER=${WEB_USER:-www}
+
+set -e
+
+tmp=$(mktemp -d)
+cd "$tmp"
+output=$($ADMIN_SCRIPT data_pack)
+
+cd "$WEB_DIR"
+cat "$tmp/$output" | sudo -u "$WEB_USER" tee "$output" > /dev/null
+chmod ug+r "$output"
+sudo -u "$WEB_USER" ln -sf "$output" "testbed-data.${output#*.}"
+rm -rf "$tmp"

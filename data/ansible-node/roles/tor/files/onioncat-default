@@ -1,0 +1,3 @@
+ENABLED=yes
+DAEMON_OPTS="-d 0 $(cat /var/lib/tor/onioncat/hostname)"
+

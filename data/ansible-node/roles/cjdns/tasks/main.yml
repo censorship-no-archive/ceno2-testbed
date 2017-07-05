@@ -1,0 +1,114 @@
+---
+
+- name: Set cjdns check facts
+  set_fact:
+    cjdns_version_wanted: "19"
+    cjdns_version_current: "0"
+    cjdns_debversion_wanted: "0.17.1"
+    must_install_cjdns: true
+    cjdns_tarball: "cjdns-v19.1.tar.gz"
+    cjdns_tardir: "cjdns-cjdns-v19.1"
+
+- name: Set other facts
+  set_fact:
+    cjdns_debfile:
+      x86_64: "cjdns_{{cjdns_debversion_wanted}}_amd64.deb"
+      i386: "cjdns_{{cjdns_debversion_wanted}}_i386.deb"
+      i486: "cjdns_{{cjdns_debversion_wanted}}_i386.deb"
+      i586: "cjdns_{{cjdns_debversion_wanted}}_i386.deb"
+      i686: "cjdns_{{cjdns_debversion_wanted}}_i386.deb"
+
+- name: Check if cjdns package is installed in wanted version
+  command: dpkg-query -W -f='${Version}' cjdns
+  ignore_errors: true
+  register: dpkg_query_cjdns
+
+- name: Check installed cjdns version
+  command: /usr/bin/cjdroute --version
+  when: dpkg_query_cjdns.stdout == cjdns_debversion_wanted
+  ignore_errors: true
+  register: cjdns_version_cmd
+
+- name: Parse cjdns version
+  set_fact:
+    cjdns_version_current: "{{ cjdns_version_cmd.stdout_lines[1] | regex_replace('Cjdns protocol version: ', '') }}"
+  when: dpkg_query_cjdns.stdout == cjdns_debversion_wanted
+
+- name: Cancel cjdns installation
+  set_fact:
+    must_install_cjdns: false
+  when: cjdns_version_current == cjdns_version_wanted
+
+- name: Install packages required for build
+  apt: pkg={{item}} state=installed
+  with_items:
+    - "build-essential"
+    - "debhelper"
+    - "nodejs"
+    - "wget"
+    - "python"
+    - "dh-systemd"
+    - "jq"
+  when: must_install_cjdns
+
+- name: Create build directory
+  file: path=/root/cjdns-build state=directory
+  when: must_install_cjdns
+
+- name: Unpack cjdns tarball
+  unarchive:
+    src: "{{cjdns_tarball}}"
+    dest: "/root/cjdns-build/"
+  when: must_install_cjdns
+
+- name: Put systemd line into debian.install
+  lineinfile:
+    dest: "/root/cjdns-build/{{cjdns_tardir}}/debian/cjdns.install"
+    line: "contrib/systemd/cjdns-resume.service /lib/systemd/system/"
+    create: no
+  when: must_install_cjdns
+
+- name: Build Debian package
+  command: dpkg-buildpackage -b -rfakeroot
+  args:
+    chdir: "/root/cjdns-build/{{cjdns_tardir}}"
+  when: must_install_cjdns
+
+- name: Install cjdns debian package
+  apt:
+    deb: "/root/cjdns-build/{{ cjdns_debfile[ansible_userspace_architecture] }}"
+  when: must_install_cjdns
+ 
+- name: Remove cjdns build folder
+  file:
+    path: /root/cjdns-build
+    state: absent
+  when: must_install_cjdns
+
+- name: Create some directories in /usr/local
+  file: path=/usr/local/{{item}} state=directory owner=root group=root mode=0755
+  with_items: [bin, etc]
+
+- name: Copy cjdns peers JSON files
+  copy: src={{item}} dest=/usr/local/etc/{{item}} owner=root group=root mode=0600
+  with_items:
+    - cjdns-client-connectto4.json
+    - cjdns-client-connectto6.json
+  notify:
+    - restart cjdns
+
+- name: Install packages for peer injection script
+  apt: pkg={{item}} state=installed
+  with_items:
+    - "jq"
+
+- name: Copy cjdns peer injection script
+  copy: src=cjdns-inject-connectto dest=/usr/local/bin/cjdns-inject-connectto owner=root group=root mode=0755
+  notify:
+    - restart cjdns
+
+- name: Run cjdns peer injection script
+  command: /usr/local/bin/cjdns-inject-connectto
+
+- name: Enable the cjdns service
+  service: name=cjdns enabled=true

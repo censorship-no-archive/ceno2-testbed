@@ -1,0 +1,35 @@
+# Per-testbed parameters, please make sure to **REPLACE ALL VALUES WITH YOUR OWN**
+# to avoid behaving like other testbeds.
+# Also avoid publishing them
+# to avoid giving away information that would ease blocking external resources.
+
+# When to run the different OONI-based tests.
+op_schedule:
+  # This test will run at the given *local* times.
+  peer_http_reachable:
+    hour: "3,11,19"  # exact hours, 8 hours apart here
+    minute: 42  # exact minute
+  # This test will run at the same UTC time in all nodes (if their clock is on time).
+  p2p_bittorrent:
+    fixed_utc: '2332'  # at 23:32 UTC
+    minute: "02,17,32,47"  # the minutes above and +15, +30, +45 minutes (MOD 60)
+
+# URLs which just report the visiting IP address as text.
+ip4_guessing_url: ['https://myipaddress.example/', 'http://whoami.example/']
+
+# The port where the OONI collector listens (hopefully over some VPN or tunnel).
+tnl_ooni_collector_port: 12345
+
+# The IP+PORT where the OONI HTTP peer locator helper listens.
+# This must be a clearnet or the reporting of peers will not work.
+ooni_peerlocator_helper: ['192.0.2.1:56789']
+
+# Optional Tor bridges to be used by nodes by default (see `Bridge` in `torrc(5)`).
+tor_bridges:
+  - fingerprint: 0123456789ABCDEFFEDCBA987654321001234567
+    arguments:
+      - cert=CERTCERTCERTCERTCERTCERTCERTCERTCERTCERTCERTCERTCERTCERTCERTCERTCERTCE
+      - iat-mode=0
+    address: '192.0.2.2'
+    transport: obfs4
+    port: 34567

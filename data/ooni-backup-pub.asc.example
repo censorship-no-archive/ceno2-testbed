@@ -1,0 +1,8 @@
+# Public PGP key to encrypt backups of OONI data.
+#
+# Backups of OONI test results sitting in the shared folder of a node VM
+# (and thus directly accessible from the host or circulated over the Internet)
+# will be automatically encrypted with this key.
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+...
+-----END PGP PUBLIC KEY BLOCK-----

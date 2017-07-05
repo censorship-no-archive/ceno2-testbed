@@ -1,0 +1,17 @@
+ControlPort 9051
+
+HiddenServiceDir /var/lib/tor/onioncat/
+HiddenServicePort 8060 127.0.0.1:8060
+
+{% if tor_bridges is defined %}
+ClientTransportPlugin obfs4 exec /usr/bin/obfs4proxy
+
+UseBridges 1
+
+{% for br in tor_bridges %}
+Bridge {{br.transport}} {{br.address}}:{{br.port}} {{br.fingerprint}} {{br.arguments | join (' ')}}
+{% endfor %}
+
+{% else %}
+UseBridges 0
+{% endif %}

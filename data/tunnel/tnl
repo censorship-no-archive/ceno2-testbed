@@ -1,0 +1,185 @@
+#!/bin/bash
+#
+# Requires ``uuid-runtime``.
+
+. tnlvars.sh
+
+# Functions to connect to a specified tunnel endpoint
+tunstart_ovpn() {
+  local peer=$1
+  local port=$2
+  local conn_id=$3
+
+  echo ovpn >"${LOGDIR}/${conn_id}.log"
+
+  $OVPN \
+    --port "$port" \
+    --remote "$peer" \
+    --proto tcp \
+    --dev "tap-${conn_id}" \
+    --client \
+    --ns-cert-type server \
+    --remote-cert-tls server \
+    --route-nopull \
+    --persist-key \
+    --persist-tun \
+    --nobind \
+    --comp-lzo \
+    --ca "$TLS_CA" \
+    --cert "$TLS_CERT" \
+    --key "$TLS_KEY" \
+    --writepid "${DATADIR}/${conn_id}.pid" \
+    --log-append "${LOGDIR}/${conn_id}.log" \
+    --daemon
+}
+
+tunstart_pppssh() {
+  local peer=$1
+  local port=$2
+  local conn_id=$3
+
+  echo pppssh >"${LOGDIR}/${conn_id}.log"
+
+  $PPP \
+    noauth \
+    pty "ssh -t -i ${SSH_KEY} -p ${port} ${SSH_LOGIN}@${peer}" \
+    linkname $conn_id \
+    logfile "${LOGDIR}/${conn_id}.log"
+}
+
+tunstart_ppptls() {
+  local peer=$1
+  local port=$2
+  local conn_id=$3
+
+  echo ppptls >"${LOGDIR}/${conn_id}.log"
+
+  local stnconf="${DATADIR}/stunnel-${conn_id}.conf"
+
+  cat <<__EOF__ >"$stnconf"
+client = yes
+foreground = yes
+verify = 2
+CAfile = $TLS_CA
+cert = $TLS_CERT
+key = $TLS_KEY
+TIMEOUTconnect = 60
+connect = ${peer}:${port}
+__EOF__
+
+  $PPP \
+    noauth \
+    pty "$STNL $stnconf" \
+    linkname $conn_id \
+    logfile "${LOGDIR}/${conn_id}.log"
+
+  sleep 1
+  rm -f "$stnconf"
+}
+
+# But you would rather call this one, e.g.:
+# tunstart ovpn 1.2.4.5 1194
+# It'll return you a connection ID, to use with functions below
+tunstart() {
+  local mode=$1
+  local peer=$2
+  local port=$3
+  local conn_id=$(uuidgen|cut -d - -f 1)
+
+  case "$mode" in
+    ovpn)
+      tunstart_ovpn "$peer" "$port" "$conn_id"
+    ;;
+    pppssh)
+      tunstart_pppssh "$peer" "$port" "$conn_id"
+    ;;
+    ppptls)
+      tunstart_ppptls "$peer" "$port" "$conn_id"
+    ;;
+    *)
+      return 1
+    ;;
+  esac
+
+  echo $conn_id
+}
+
+# Usage: tuncheck connection_id
+tuncheck() {
+  local id=$1
+  local mode=$(head -n 1 "${LOGDIR}/${id}.log")
+  case $mode in
+    pppssh|ppptls)
+      local ping_ip=$PPP_CHECK_IP
+    ;;
+    ovpn)
+      local ping_ip=$OVPN_CHECK_IP
+    ;;
+    *)
+      return 1
+    ;;
+  esac
+  
+  if ping -c 1 -W $CHECK_TIMEOUT $ping_ip >/dev/null 2>/dev/null; then
+    echo UP
+    return 0
+  else
+    echo DOWN
+    return 1
+  fi
+}
+
+tunip() {
+  local id=$1
+  local mode=$(head -n 1 "${LOGDIR}/${id}.log")
+
+  case $mode in
+    pppssh|ppptls)
+      local ifname=$(sed '2!d' /var/run/ppp-${id}.pid)
+    ;;
+    ovpn)
+      local ifname="tap-${id}"
+    ;;
+    *)
+      return 1
+    ;;
+  esac
+
+  ip -o -f inet addr show dev "$ifname" | sed -E 's%^[0-9]+: '${ifname}' +inet ([0-9\.]+)(/[0-9]+)? .*%\1%'
+}
+
+tunstop() {
+  local id=$1
+  local mode=$(head -n 1 "${LOGDIR}/${id}.log")
+  case $mode in
+    pppssh|ppptls)
+      kill $(head -n 1 "/var/run/ppp-${id}.pid")
+    ;;
+    ovpn)
+      kill $(<"${DATADIR}/${id}.pid")
+    ;;
+    *)
+      return 1
+    ;;
+  esac
+ 
+}
+
+tunlog() {
+  local id=$1
+  cat "${LOGDIR}/${id}.log"
+}
+
+
+# If invoked as ``tnl COMMAND ARGS…``, run ``tnlCOMMAND ARGS…``.
+if [ "$(basename "$0")" = "tnl" ]; then
+    case "$1" in
+        (start|stop|check|ip|log)
+            action=$1
+            shift
+            tun$action "$@"
+            ;;
+        (*) echo "tnl start|stop|check|ip|log ARGS…" >&2
+            exit 1
+    esac
+fi

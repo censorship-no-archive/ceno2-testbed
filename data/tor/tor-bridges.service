@@ -1,0 +1,12 @@
+[Unit]
+Description=Tor bridges web form
+After=network.target
+
+[Service]
+ExecStart=/usr/local/sbin/tor-bridges-webform.py 172.27.72.1:8080
+Restart=on-failure
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=default.target

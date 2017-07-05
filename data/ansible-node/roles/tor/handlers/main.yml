@@ -1,0 +1,7 @@
+---
+
+- name: restart tor
+  service: name=tor state=restarted
+
+- name: restart onioncat
+  service: name=onioncat state=restarted

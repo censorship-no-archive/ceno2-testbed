@@ -1,0 +1,19 @@
+# <https://raw.githubusercontent.com/TheTorProject/ooni-probe/master/scripts/systemd/ooniprobe.service>
+# with fixes to program paths and user/group.
+[Unit]
+Description=%n, network interference detection tool
+After=network.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/var/lib/ooni/twistd.pid
+ExecStart=/usr/bin/ooniprobe-agent start
+ExecStop=/usr/bin/ooniprobe-agent stop
+TimeoutStartSec=300
+TimeoutStopSec=60
+Restart=on-failure
+User=Debian-ooni
+Group=Debian-ooni
+
+[Install]
+WantedBy=multi-user.target

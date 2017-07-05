@@ -1,0 +1,18 @@
+# # Files to be encrypted
+# Listed in ``node.md``:
+data/ssh/known_hosts filter=git-crypt diff=git-crypt
+data/ssh/node-root/id_rsa filter=git-crypt diff=git-crypt
+data/ssh/node-root/id_rsa.pub filter=git-crypt diff=git-crypt
+data/cjdns/cjdns-client-connectto?.json filter=git-crypt diff=git-crypt
+data/tunnel/*.pem filter=git-crypt diff=git-crypt
+data/tunnel/pppclient filter=git-crypt diff=git-crypt
+data/tunnel/tnldo.conf filter=git-crypt diff=git-crypt
+# Auxiliary files (addresses, keys):
+data/ooni-backup-pub.asc filter=git-crypt diff=git-crypt
+data/ooni-backup-priv.asc filter=git-crypt diff=git-crypt
+data/ssh/testbed-admin/id_rsa filter=git-crypt diff=git-crypt
+data/ssh/testbed-admin/id_rsa.pub filter=git-crypt diff=git-crypt
+# Files needed by Ansible playbooks:
+data/ansible-node/roles/ssh/files/authorized_keys filter=git-crypt diff=git-crypt
+data/ansible-node/roles/tnlscripts/files/tnlvars.sh filter=git-crypt diff=git-crypt
+data/ansible-node/host_vars/localhost.yml filter=git-crypt diff=git-crypt

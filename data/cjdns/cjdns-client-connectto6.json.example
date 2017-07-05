@@ -1,0 +1,20 @@
+// cjdns IPv6 peers to connect to.
+//
+// The node will connect to all peers listed here.
+//
+// Please remember to remove comments since
+// they are not supported by standard JSON.
+{
+    "[SERVER1_PUBLIC_IPv6_ADDRESS]:SERVER1_CJDNS_PORT": {
+        "login": "default-login",
+        "password": "PASS1PASS1PASS1PASS1PASS1PASS1P",
+        "publicKey": "PUBKEY1PUBKEY1PUBKEY1PUBKEY1PUBKEY1PUBKEY1PUBKEY1PUB.k",
+        "peerName": "SERVER1_NAME"
+    },
+    "[SERVER2_PUBLIC_IPv6_ADDRESS]:SERVER2_CJDNS_PORT": {
+        "login": "default-login",
+        "password": "PASS2PASS2PASS2PASS2PASS2PASS2P",
+        "publicKey": "PUBKEY2PUBKEY2PUBKEY2PUBKEY2PUBKEY2PUBKEY2PUBKEY2PUB.k",
+        "peerName": "SERVER2_NAME"
+    }
+}

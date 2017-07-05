@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Edit me and rename me to tnlvars.sh
+
+# Don't forget to create these directories accordingly
+DATADIR=/var/local/lib/tnl
+LOGDIR=${DATADIR}/log
+
+# These are Debian paths, but may change on other distributions
+OVPN=/usr/sbin/openvpn
+PPP=/usr/sbin/pppd
+STNL=/usr/bin/stunnel4
+
+# You'll need the server's CA to verify its identity, and keys and certificates
+# for the client to be allowed in
+TLS_CA=${DATADIR}/ca.crt.pem
+TLS_CERT=${DATADIR}/client.crt.pem
+TLS_KEY=${DATADIR}/client.key.pem
+SSH_KEY=${DATADIR}/pppclient
+
+# These settings must be set accordingly to the tunnel server
+SSH_LOGIN=ppp
+PPP_CHECK_IP=10.0.0.1
+OVPN_CHECK_IP=10.1.0.1
+CHECK_TIMEOUT=10
+

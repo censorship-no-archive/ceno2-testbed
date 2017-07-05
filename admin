@@ -1,0 +1,67 @@
+#!/bin/sh
+# Several tools to manage the testbed.
+
+TB_WEB_ACCESS_LOG=${TB_WEB_ACCESS_LOG:-/var/log/nginx/vhost-server.testbed/access.log}
+TB_OONI_DATA=${TB_OONI_DATA:-/home/ooni/data}
+TB_ADMIN_SSH_ID=${TB_ADMIN_SSH_ID:-$HOME/testbed/id_rsa}
+TB_PSSH_SSH_OPTS="${TB_PSSH_SSH_OPTS:--o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -i $TB_ADMIN_SSH_ID}"
+
+
+# Make date handling safe.
+export LC_TIME=C
+
+
+# Print ``n=NODE_ID a=NODE_ADDR1/NODE_PFX1 a=NODE_ADDR2/NODE_PFX2... i4=NODE_PUB_ADDR``
+# for each node which reported today.
+nodes_addrs() {
+    local today=$(date -u +%d/%b/%Y)
+    sudo cat "$TB_WEB_ACCESS_LOG" \
+        | sed -En 's#^.*\['"$today"'.*GET /addrs/\?(n=.*) HTTP/.*#\1#p' \
+        | tr '&' ' ' | sort -k1 -u
+}
+
+# Print the cjdns IPv6 address of each node which reported today.
+nodes_cjdns_addrs() {
+    nodes_addrs | sed -En 's#.*\ba=(fc[^/]+)/.*#\1#p' | sort -u
+}
+
+# Execute the given command in each node which reported today.
+nodes_exec() {
+    local ts=$(date -u +%Y%m%dT%H%M%S)
+    # Include the SSH port for IPv6 compatibility, see
+    # <https://bugs.debian.org/741537>.
+    nodes_cjdns_addrs | sed 's/$/:22/' \
+        | parallel-ssh -h /dev/stdin -x "$TB_PSSH_SSH_OPTS" -l root -o "out.$ts" -e "err.$ts" -- "$@"
+}
+
+# Pack test results and other files useful for their interpretation.
+data_pack() {
+    local ts=$(date -u +%Y%m%dT%H%M)
+    local tmp=$(mktemp -d)
+    local data_dir="$tmp/testbed-data,$ts"
+    local data_arch="$data_dir.tar.xz" data_comp="--xz"
+
+    mkdir -p "$data_dir"
+    ln -s "$TB_WEB_ACCESS_LOG" "$data_dir/web-access.log"
+    ln -s "$TB_OONI_DATA/peers.txt" "$data_dir/http-peers.txt"
+    ln -s "$TB_OONI_DATA/archive" "$data_dir/ooni-archive"
+
+    if sudo tar -ch $data_comp -C "$tmp" "$(basename "$data_dir")" > "$data_arch"; then
+        local output="$(basename "$data_arch")"
+        cp -i "$data_arch" "$output" && echo "$output"
+    fi
+
+    rm -rf "$tmp"
+}
+
+
+cmd="$1"
+test "$cmd" && shift
+
+case "$cmd" in
+    (nodes_addrs|nodes_cjdns_addrs|nodes_exec|data_pack)
+        $cmd "$@"
+        ;;
+    (*) echo "Usage: $(basename "$0") nodes_addrs|nodes_cjdns_addrs|nodes_exec|data_pack ARG..." >&2  ##XXXX enhance
+        exit 1
+esac

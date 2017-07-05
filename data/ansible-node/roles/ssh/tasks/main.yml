@@ -1,0 +1,23 @@
+---
+
+- name: Create root's .ssh folder
+  file: path=/root/.ssh state=directory owner=root group=root mode=0700
+
+- name: Install our SSH identity files
+  copy: src={{item}} dest=/root/.ssh/{{item}} owner=root group=root mode=0600
+  with_items:
+    - "id_rsa"
+    - "id_rsa.pub"
+
+- name: Allow testbed admin SSH key
+  authorized_key:
+    key: "{{ lookup('file', 'authorized_keys') }}"
+    user: root
+
+- name: Copy known hosts file
+  copy: src=known_hosts dest=/root/.ssh/known_hosts owner=root group=root mode=0600
+
+- name: Set SSH server configuration
+  copy: src=sshd_config dest=/etc/ssh/sshd_config owner=root group=root mode=0644
+  notify:
+    - restart ssh

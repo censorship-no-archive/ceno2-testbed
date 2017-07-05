@@ -1,0 +1,7 @@
+---
+
+- name: Install OpenVPN
+  apt: pkg={{item}} state=installed
+  with_items:
+    - openvpn
+

@@ -1,0 +1,7 @@
+# Private PGP key to decrypt backups of OONI data.
+#
+# Please keep this safe to avoid encrypted backups of OONI test results
+# to be accessible to others.
+-----BEGIN PGP PRIVATE KEY BLOCK-----
+...
+-----END PGP PRIVATE KEY BLOCK-----

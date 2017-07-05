@@ -1,0 +1,34 @@
+---
+
+- name: Install base packages
+  apt: pkg={{item}} state=installed
+  with_items:
+    - anacron
+    - vnstat
+    - openssh-server
+    - sudo
+    - screen
+    - rsync
+    - git
+    - bash
+    - wget
+    - debconf-utils
+    - aptitude
+  tags: base
+
+- name: Disable ad-hoc services related with unwanted packages
+  service: name={{item}} state=stopped enabled=no
+  with_items:
+    - ooniprobe
+  ignore_errors: true
+
+- name: Make sure unwanted packages are absent
+  apt: pkg={{item}} state=absent purge=yes
+  with_items:
+    - nfs-common
+    - rpcbind
+    - exim4
+    - exim4-base
+    - exim4-config
+    - exim4-daemon-light
+    - ooniprobe
