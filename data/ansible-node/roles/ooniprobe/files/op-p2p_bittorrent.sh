@@ -8,4 +8,4 @@ cd "$PROBE_SRC"
 . "${PROBE_VENV}/bin/activate"
 
 python ooni/scripts/ooniprobe.py -n \
-  ooni/nettests/experimental/p2p_bittorent_test.py
+  ooni/nettests/experimental/p2p_bittorrent_test.py
