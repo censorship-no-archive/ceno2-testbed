@@ -172,7 +172,7 @@
 
 - name: Set UTC time condition for peer_http_reachable OONI test
   set_fact:
-    peer_http_reachable_condition: "[ $(date -u \\%H\\%M) = {{op_schedule.peer_http_reachable.fixed_utc}} ] && "
+    peer_http_reachable_condition: "[ $(date -u +\\%H\\%M) = {{op_schedule.peer_http_reachable.fixed_utc}} ] && "
   when: op_schedule.peer_http_reachable.fixed_utc is defined
 
 - name: Set cron task for http reachability test
@@ -187,7 +187,7 @@
 
 - name: Set UTC time condition for p2p_bittorrent OONI test
   set_fact:
-    p2p_bittorrent_condition: "[ $(date -u \\%H\\%M) = {{op_schedule.p2p_bittorrent.fixed_utc}} ] && "
+    p2p_bittorrent_condition: "[ $(date -u +\\%H\\%M) = {{op_schedule.p2p_bittorrent.fixed_utc}} ] && "
   when: op_schedule.p2p_bittorrent.fixed_utc is defined
 
 - name: Set cron task for p2p test
