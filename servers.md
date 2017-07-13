@@ -208,7 +208,7 @@ tree.
 
 The directory `ansible-node` in this repository must be copied under the name
 `ansible`, in the directory `/usr/local/lib/node-data/` as described above. From
-the `testbed/data/` subdirectory of this repository, do:
+the `data/` subdirectory of this repository, do:
 
     rsync --delete -rvL ansible-node/ collector_address:ansible
 
