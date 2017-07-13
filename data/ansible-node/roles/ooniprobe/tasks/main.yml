@@ -79,9 +79,9 @@
 
 - name: Copy git repository of ooniprobe
   git:
-    repo: https://github.com/vmon/ooni-probe
+    repo: https://github.com/equalitie/ooni-probe
     dest: /root/ooniprobe-git/
-    version: aef544c11bb52174f54ba76a29fdaa637781a522
+    version: f9d41e8f823fd998ae8eab980f7ddaca7f9042ee
 
 - name: Install some python dependencies that ooniprobe does not seem to know about
   pip:
