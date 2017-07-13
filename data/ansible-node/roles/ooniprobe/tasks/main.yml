@@ -68,8 +68,8 @@
 - name: Copy p2p test version tag file
   copy: src=p2p-test-tag dest=/opt/transmission/p2p-test-tag mode=0644
 
-- name: Ensure that p2p test run script is executable
-  file: path=/opt/transmission/run-test.sh mode=0755
+- name: Ensure that p2p test run script is up to date and executable
+  copy: src=p2p-test/run-test.sh dest=/opt/transmission/run-test.sh mode=0755
 
 - name: Create venv folder
   file: path=/root/venvs state=directory
