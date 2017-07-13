@@ -163,13 +163,14 @@ run experiments on it.  The following factors must be taken into account:
 
 Specifically, experiments are implemented as [OONI][] net tests run by probes in
 nodes, with some tests requiring special helpers run by backend servers.  They
-are implemented in *ad-hoc code forks* of the
-[OONI probe](https://github.com/vmon/ooni-probe) and the
-[OONI backend](https://github.com/vmon/ooni-backend/), respectively.  This means
-that currently, to deploy new tests, backend or probe code needs to be further
-forked or adapted and redeployed to servers and nodes.  The latter is handled in
-Ansible playbooks, while the former requires manual intervention from testbed
-administrators.
+are implemented in a custom [OONI probe fork][] and a [OONI backend fork][],
+respectively.  This means that currently, to deploy new tests, backend or probe
+code needs to be further forked or adapted and redeployed to servers and nodes.
+The latter is handled in Ansible playbooks, while the former requires manual
+intervention from testbed administrators.
+
+[OONI probe fork]: https://github.com/equalitie/ooni-probe/tree/eq-testbed
+[OONI backend fork]: https://github.com/equalitie/ooni-backend/tree/eq-testbed
 
 There is another way of running an additional test in a node, as long as it does
 not need explicit support from the backend (i.e. a helper) or testbed servers.
@@ -341,10 +342,9 @@ censored zone *and* in different zones:
 
 ## Supported tests
 
-The testbed uses a custom [OONI probe fork](https://github.com/vmon/ooni-probe/)
-running on nodes and reporting to collector servers, which in turn run a custom
-[OONI backend fork](https://github.com/vmon/ooni-backend/commits/peer-locator).
-The original probe developed by the *Open Observatory of Network Interference*
+The testbed uses a custom [OONI probe fork][] running on nodes and reporting to
+collector servers, which in turn run a custom [OONI backend fork][].  The
+original probe developed by the *Open Observatory of Network Interference*
 [OONI][] provides several *net tests* to detect censorship, surveillance and
 traffic manipulation.  The custom version of the probe adds some new
 experimental tests which provide information relevant to the technologies that

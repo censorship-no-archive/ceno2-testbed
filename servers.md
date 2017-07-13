@@ -282,23 +282,21 @@ OONI probes can thus reach a collector in various ways:
 
 ### Installation and configuration
 
-We are using a customised version of the OONI backend as [developed by
-Vmon](https://github.com/vmon/ooni-backend/). This version provides a test
-helper that we need for our peer-to-peer tests. Installation in a Python virtual
-environment should be straightforward:
+We are using a custom
+[OONI backend fork](https://github.com/equalitie/ooni-backend/tree/eq-testbed)
+based on work from Vmon. This version provides a test helper that we need for
+our peer-to-peer tests. Installation in a Python virtual environment should be
+straightforward:
 
     sudo apt-get install build-essential python-dev python-setuptools openssl libsqlite3-dev libffi-dev git curl
-    mkdir ~/venvs
-    cd ~/venvs
-    virtualenv ooni-backend-vmon
-    mkdir ~/vmon-ooni
-    cd ~/vmon-ooni
-    git clone -b peer-locator https://github.com/vmon/ooni-backend/
-    . venvs/ooni-backend-vmon/bin/activate
-    cd ooni-backend/
+    mkdir -p ~/venvs
+    virtualenv ~/venvs/ooni-backend-eq
+    . ~/venvs/ooni-backend-eq/bin/activate
+    pip install --upgrade setuptools  # the one provided by virtualenv can be outdated
+    mkdir -p ~/vc/git
+    git clone -b eq-testbed 'https://github.com/equalitie/ooni-backend.git' ~/vc/git/ooni-backend-eq
+    cd ~/vc/git/ooni-backend-eq
     pip install -r requirements.txt
-    pip uninstall setuptools
-    pip install setuptools # the one provided by virtualenv can be outdated
     python setup.py install
 
 Copy `oonib.conf.example` to `oonib.conf` and edit it. Assuming the user running
@@ -329,8 +327,8 @@ systemd to start the backend and restart it if it crashes:
     After=network.target
 
     [Service]
-    WorkingDirectory=/home/ooni/vmon-ooni/ooni-backend
-    ExecStart=/home/ooni/venvs/ooni-backend-vmon/bin/python bin/oonib
+    WorkingDirectory=/home/ooni/vc/git/ooni-backend-eq
+    ExecStart=/home/ooni/venvs/ooni-backend-eq/bin/python bin/oonib
     Restart=on-failure
 
     [Install]
