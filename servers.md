@@ -298,6 +298,13 @@ straightforward:
     cd ~/vc/git/ooni-backend-eq
     pip install -r requirements.txt
     python setup.py install
+    cd
+    ln -s vc/git/ooni-backend-eq/data
+
+The last operation makes the data directory available using the symbolic link
+`/home/ooni/data`, which can be used e.g. for packing data using the
+[Testbed administration script](#testbed-administration-script).  Measurements
+reported by nodes are stored in the `archive` subdirectory.
 
 Copy `oonib.conf.example` to `oonib.conf` and edit it. Assuming the user running
 `oonib` is called `ooni`, the following bits are of interest:
