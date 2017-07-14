@@ -6,6 +6,8 @@ CURRENT="$PWD"
 rm -rf ~/.config/transmission
 cd "$DIR"
 "$CLIENT" --download-dir . "$TORRENT" >/dev/null 2>/dev/null
+RET=$?
 cat transmission-instrumentation.log.json
 cd "$CURRENT"
 rm -rf "$DIR"
+exit $RET
