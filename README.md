@@ -433,18 +433,11 @@ directory.  When the client finishes its downloads, it exits and the JSON
 document is dumped.  This helps detect P2P protocol interference.
 <!--- XXXX review, extend --->
 
-A properly formatted and pretty-printed version of the JSON document can be
-obtained with this command (which uses the [jq](https://stedolan.github.io/jq/)
-processor):
-
-    cat transmission-instrumentation.log.json \
-        | { sed 's/(null)/null/g' ; echo ] ; } | jq .
-
 Given a report retrieved from an OONI backend server as ``REPORT.json``, this
-command can be run instead:
+command (which uses the [jq](https://stedolan.github.io/jq/) processor) can be
+run to get a pretty-prined version of the output produced by the test:
 
-    jq -r '.test_keys.commands[0].command_stdout' REPORT.json \
-        | { sed 's/(null)/null/g' ; echo ] ; } | jq .
+    jq -r '.test_keys.commands[0].command_stdout' REPORT.json | jq .
 
 The output consists of an array of events as objects with a ``timestamp`` key
 and a string value showing the Unix timestamp (UTC, seconds) of the event, and a
@@ -481,7 +474,7 @@ at IP ``peer-address``  (string) and port ``peer-port`` (number). <!--- XXXX ver
 : A connection teardown with IP ``peer-address`` (string) and port ``peer-port``
 (number), after exchanging ``bytes-sent`` and ``bytes-received`` (numbers),
 ``encrypted`` or not (boolean), with ``reason-error`` set if it was caused by an
-error (boolean). <!--- XXXX booleans appear as null? --->
+error (boolean).
 
 This test is being run daily in the testbed at the same time in all nodes
 (1:53 UTC, save local clock inaccuracies), and it reports as
