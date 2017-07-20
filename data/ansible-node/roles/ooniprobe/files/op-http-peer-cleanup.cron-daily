@@ -1,7 +1,7 @@
 #!/bin/sh
 # Cleanup ``simple_http.py`` instances that have been running for too long.
 
-PROC_RE=".*\bsimple_http\.py\b.*"
+PROC_RE=".*\bpython\b.*\booni.utils.simple_http\b.*"
 PROC_MAX_AGE_SECS=$((8 * 24 * 60 * 60))  # 8 days
 
 now=$(date +%s)
