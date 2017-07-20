@@ -383,13 +383,14 @@ The ``peer_locator_test`` net test contacts a custom given ``peer-locator``
 helper running in a collector server to detect and remember the addresses where
 other nodes (*peers*) are running test HTTP servers.
 
-The test starts a trivial test HTTP server (using UPnP if behind NAT) which
-provides a big binary file, it connects to the helper and provides the TCP port
-number where the HTTP server listens, an indication of the protocol it uses
-(HTTP) and other flags (which include whether NAT is used or not).  The helper
-remembers these parameters along with its IP address and a time stamp, and
-provides back a random entry of one of the peers that queried it before.  The
-test keeps a list of all such discovered peers in ``/root/peer_list.txt``.
+The test (i) starts a simple test HTTP server (UPnP-enabled if behind NAT) which
+provides a big binary file as its root document, (ii) it connects to the helper
+and provides the TCP port number where the HTTP server listens, an indication of
+the protocol it uses (HTTP) and other flags (which include whether NAT is used
+or not).  The helper remembers (with a time stamp) these parameters along with
+the peer's IP address, and (iii) provides back to the test a random entry of one
+of the peers that queried the helper before.  The test keeps a list of all such
+discovered peers in ``/root/peer_list.txt``.
 
 The test report includes the following fields:
 
@@ -409,9 +410,9 @@ was successful and the delay between request and response.  This helps detect
 blocking of direct (TCP/HTTP) connections inside of the potentially censored
 zone.
 
-In testbed nodes, tests are concurrently run for all addresses in
-``/root/peer_list.txt``, i.e. the file created by the peer locator test, so that
-the reachability of other nodes is tested.
+In testbed nodes, tests are concurrently run for fresh enough entries of the
+same protocol in ``/root/peer_list.txt``, i.e. the file created by the peer
+locator test, so that the reachability of other nodes is tested.
 
 The test report includes the following fields:
 
@@ -422,11 +423,12 @@ The test report includes the following fields:
 : Delay between HTTP request and response (in seconds, number).
 
 ``peer_ts``
-: A UNIX UTC time stamp indicating when the peer first reported its existence to
-the peer locator.
+: A UNIX UTC time stamp indicating when the contacted peer first reported its
+existence to the peer locator (in seconds, number).
 
 ``peer_nat``
-: Whether the peer claimed to be behind NAT to the peer locator.
+: Whether the contacted peer claimed to be behind NAT to the peer locator
+(boolean).
 
 This test is being run every 6 hours in the testbed and it reports as
 ``http_reachability_test``.
