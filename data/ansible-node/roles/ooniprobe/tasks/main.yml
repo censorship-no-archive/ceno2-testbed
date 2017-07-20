@@ -170,6 +170,9 @@
     special_time: daily
     user: root
 
+- name: Set daily cron task for cleanup of peer locator servers
+  copy: src=op-http-peer-cleanup.cron-daily dest=/etc/cron.daily/op-http-peer-cleanup owner=root group=root mode=0755
+
 - name: Set UTC time condition for peer_http_reachable OONI test
   set_fact:
     peer_http_reachable_condition: "[ $(date -u +\\%H\\%M) = {{op_schedule.peer_http_reachable.fixed_utc}} ] && "
