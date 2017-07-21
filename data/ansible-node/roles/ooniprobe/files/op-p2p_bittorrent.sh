@@ -2,10 +2,9 @@
 
 # Load our own config
 . /usr/local/etc/ooniconf.sh
-
-cd "$PROBE_SRC"
-
 . "${PROBE_VENV}/bin/activate"
 
-python ooni/scripts/ooniprobe.py -n \
-  ooni/nettests/experimental/p2p_bittorrent_test.py
+TEST=ooni.nettests.experimental.p2p_bittorrent_test
+TEST_FILE=$(python -c "import $TEST as m; print(m.__file__)")
+
+python -m ooni.scripts.ooniprobe -n "$TEST_FILE"
