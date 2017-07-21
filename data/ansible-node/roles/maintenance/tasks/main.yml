@@ -1,6 +1,9 @@
 ---
 
-# Accept only `IPv4:PORT` or `[IPv6]:PORT` lines with a numeric PORT.
-- name: Fix peer locator's test peer list file in case it contains bogus entries
-  command: sed -Ei '/^([.0-9]+|\[[:0-9a-fA-F]+\]):[0-9]+$/!d' /root/peer_list.txt
+# Accept only ``SECS.DEC IP:PORT PROTO[ FLAG]...``, empty and commented lines,
+# comment out with ``##`` otherwise.
+# The proper way to do this would be to use Ansible's ``replace`` module,
+# but regexp negation (``(?!...)``) does not seem to work well.
+- name: "Fix peer locator's test peer list file in case it contains bogus entries"
+  command: "sed -Ei '/^(()|(#.*)|([0-9]+\\.[0-9]+ ([.0-9]+|\\[[:0-9a-f]+\\]):[0-9]+ [A-Z]+( [_a-z]+)*))$/!s/^/## /' /root/peer_list.txt"
   ignore_errors: true
