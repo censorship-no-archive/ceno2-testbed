@@ -2,7 +2,7 @@
 # Send pending reports to OONI collector,
 # backup measurements to shared folder if available.
 
-tnldo sh -c '/root/venvs/ooniprobe/bin/python /root/ooniprobe-git/ooni/scripts/oonireport.py -c http://$TNL_ADDR_BKT:{{tnl_ooni_collector_port}} upload'
+tnldo sh -c '/root/venvs/ooniprobe/bin/python -m ooni.scripts.oonireport -c http://$TNL_ADDR_BKT:{{tnl_ooni_collector_port}} upload'
 
 if [ $? -ne 0 ] && mountpoint -q /shared; then
     # Only backup when the upload failed and the shared folder is available.
