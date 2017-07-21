@@ -2,10 +2,10 @@
 
 # Load our own config
 . /usr/local/etc/ooniconf.sh
-
-cd "$PROBE_SRC"
-
 . "${PROBE_VENV}/bin/activate"
 
-python ooni/scripts/ooniprobe.py -n \
-  ooni/nettests/experimental/peer_http_reachable.py --file="$PROBE_PEERLIST"
+TEST=ooni.nettests.experimental.peer_http_reachable
+TEST_FILE=$(python -c "import $TEST as m; print(m.__file__)" | sed 's/py.$/py/')
+
+python -m ooni.scripts.ooniprobe -n "$TEST_FILE" \
+    --file="$PROBE_PEERLIST"

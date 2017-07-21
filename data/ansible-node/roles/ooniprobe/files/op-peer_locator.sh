@@ -2,15 +2,14 @@
 
 # Load our own config
 . /usr/local/etc/ooniconf.sh
-
-cd "$PROBE_SRC"
-
 . "${PROBE_VENV}/bin/activate"
 
+TEST=ooni.nettests.experimental.peer_locator_test
+TEST_FILE=$(python -c "import $TEST as m; print(m.__file__)" | sed 's/py.$/py/')
+
 for BACKEND in $PROBE_BACKENDS; do
-  python ooni/scripts/ooniprobe.py -n \
-    ooni/nettests/experimental/peer_locator_test.py \
-      --backend "$BACKEND" \
+  python -m ooni.scripts.ooniprobe -n "$TEST_FILE" \
+      --backend="$BACKEND" \
       --peer_list="$PROBE_PEERLIST" \
       --http_port=random
 done
