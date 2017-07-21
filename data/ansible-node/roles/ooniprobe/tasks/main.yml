@@ -81,7 +81,7 @@
   git:
     repo: https://github.com/equalitie/ooni-probe
     dest: /root/ooniprobe-git/
-    version: f9d41e8f823fd998ae8eab980f7ddaca7f9042ee
+    version: e8f65a20883c403d1e30e2e75d9cabdc2c591bb0
 
 - name: Install some python dependencies that ooniprobe does not seem to know about
   pip:
@@ -169,6 +169,9 @@
     state: present
     special_time: daily
     user: root
+
+- name: Set daily cron task for cleanup of peer locator servers
+  copy: src=op-http-peer-cleanup.cron-daily dest=/etc/cron.daily/op-http-peer-cleanup owner=root group=root mode=0755
 
 - name: Set UTC time condition for peer_http_reachable OONI test
   set_fact:

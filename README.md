@@ -381,13 +381,16 @@ This test is currently not used by the testbed.
 
 The ``peer_locator_test`` net test contacts a custom given ``peer-locator``
 helper running in a collector server to detect and remember the addresses where
-other nodes are running test HTTP servers.
+other nodes (*peers*) are running test HTTP servers.
 
-The test starts a trivial test HTTP server providing a big binary file, it
-connects to the helper and provides the TCP port number where the HTTP server
-listens.  The helper remembers the node's IP address and port, and provides back
-a random address and port of one of the nodes that queried it before.  The test
-keeps a list of all such discovered peers in ``/root/peer_list.txt``.
+The test (i) starts a simple test HTTP server (UPnP-enabled if behind NAT) which
+provides a big binary file as its root document, (ii) it connects to the helper
+and provides the TCP port number where the HTTP server listens, an indication of
+the protocol it uses (HTTP) and other flags (which include whether NAT is used
+or not).  The helper remembers (with a time stamp) these parameters along with
+the peer's IP address, and (iii) provides back to the test a random entry of one
+of the peers that queried the helper before.  The test keeps a list of all such
+discovered peers in ``/root/peer_list.txt``.
 
 The test report includes the following fields:
 
@@ -400,15 +403,16 @@ This test is being run daily in the testbed and it reports as
 
 ### Peer HTTP reachability test
 
-The ``peer_http_reachable`` net test gets a TCP address (IP address and port
-number) from a given file, connects to it via plain HTTP and tries to retrieve
-its root document, and reports whether the request was successful and the delay
-between request and response.  This helps detect blocking of direct (TCP/HTTP)
-connections inside of the potentially censored zone.
+The ``peer_http_reachable`` net test gets a peer entry including a transport
+address (IP address and port number) from a given file, connects to it via plain
+HTTP and tries to retrieve its root document, and reports whether the request
+was successful and the delay between request and response.  This helps detect
+blocking of direct (TCP/HTTP) connections inside of the potentially censored
+zone.
 
-In testbed nodes, tests are concurrently run for all addresses in
-``/root/peer_list.txt``, i.e. the file created by the peer locator test, so that
-the reachability of other nodes is tested.
+In testbed nodes, tests are concurrently run for fresh enough entries of the
+same protocol in ``/root/peer_list.txt``, i.e. the file created by the peer
+locator test, so that the reachability of other nodes is tested.
 
 The test report includes the following fields:
 
@@ -418,8 +422,16 @@ The test report includes the following fields:
 ``http_response_time``
 : Delay between HTTP request and response (in seconds, number).
 
+``peer_ts``
+: A UNIX UTC time stamp indicating when the contacted peer first reported its
+existence to the peer locator (in seconds, number).
+
+``peer_nat``
+: Whether the contacted peer claimed to be behind NAT to the peer locator
+(boolean).
+
 This test is being run every 6 hours in the testbed and it reports as
-``http_vs_https_speed_test``.
+``http_reachability_test``.
 
 ### P2P BitTorrent test
 
@@ -433,18 +445,11 @@ directory.  When the client finishes its downloads, it exits and the JSON
 document is dumped.  This helps detect P2P protocol interference.
 <!--- XXXX review, extend --->
 
-A properly formatted and pretty-printed version of the JSON document can be
-obtained with this command (which uses the [jq](https://stedolan.github.io/jq/)
-processor):
-
-    cat transmission-instrumentation.log.json \
-        | { sed 's/(null)/null/g' ; echo ] ; } | jq .
-
 Given a report retrieved from an OONI backend server as ``REPORT.json``, this
-command can be run instead:
+command (which uses the [jq](https://stedolan.github.io/jq/) processor) can be
+run to get a pretty-prined version of the output produced by the test:
 
-    jq -r '.test_keys.commands[0].command_stdout' REPORT.json \
-        | { sed 's/(null)/null/g' ; echo ] ; } | jq .
+    jq -r '.test_keys.commands[0].command_stdout' REPORT.json | jq .
 
 The output consists of an array of events as objects with a ``timestamp`` key
 and a string value showing the Unix timestamp (UTC, seconds) of the event, and a
@@ -481,7 +486,7 @@ at IP ``peer-address``  (string) and port ``peer-port`` (number). <!--- XXXX ver
 : A connection teardown with IP ``peer-address`` (string) and port ``peer-port``
 (number), after exchanging ``bytes-sent`` and ``bytes-received`` (numbers),
 ``encrypted`` or not (boolean), with ``reason-error`` set if it was caused by an
-error (boolean). <!--- XXXX booleans appear as null? --->
+error (boolean).
 
 This test is being run daily in the testbed at the same time in all nodes
 (1:53 UTC, save local clock inaccuracies), and it reports as

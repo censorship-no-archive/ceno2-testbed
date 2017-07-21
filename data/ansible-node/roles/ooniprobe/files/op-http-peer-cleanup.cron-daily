@@ -1,0 +1,13 @@
+#!/bin/sh
+# Cleanup ``simple_http.py`` instances that have been running for too long.
+
+PROC_RE=".*\bpython\b.*\booni.utils.simple_http\b.*"
+PROC_MAX_AGE_SECS=$((8 * 24 * 60 * 60))  # 8 days
+
+now=$(date +%s)
+for proc_pid in $(ps -ew -o pid,cmd --no-header | sed -En 's|^ *([0-9]+) '$PROC_RE'$|\1|p'); do
+    proc_start_time=$(date --date="$(ps -w -o lstart --no-header $proc_pid)" +%s)
+    if [ $((now - proc_start_time)) -gt $PROC_MAX_AGE_SECS ]; then
+        kill $proc_pid
+    fi
+done
