@@ -81,7 +81,7 @@
   git:
     repo: https://github.com/equalitie/ooni-probe
     dest: /root/ooniprobe-git/
-    version: c86babfb69243b9b69416acd5641cd11445930a9
+    version: 1f888eaed29e99b9c28a5d5e09c024923514eb41
 
 - name: Install some python dependencies that ooniprobe does not seem to know about
   pip:
