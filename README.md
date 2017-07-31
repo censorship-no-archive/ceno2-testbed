@@ -367,13 +367,15 @@ The test report includes the following fields:
 : Whether the plain HTTP request was successful (boolean).
 
 ``http_response_time``
-: Delay between plain HTTP request and response (in seconds, number).
+: Delay between plain HTTP request and response (in seconds, number), null if
+the connection failed.
 
 ``https_success``
 : Whether the HTTPS request was successful (boolean).
 
 ``https_response_time``
-: Delay between HTTPS request and response (in seconds, number).
+: Delay between HTTPS request and response (in seconds, number), null if the
+connection failed.
 
 This test is currently not used by the testbed.
 
@@ -420,7 +422,8 @@ The test report includes the following fields:
 : Whether the HTTP request was successful (boolean).
 
 ``http_response_time``
-: Delay between HTTP request and response (in seconds, number).
+: Delay between HTTP request and response (in seconds, number), null if the
+connection failed.
 
 ``peer_ts``
 : A UNIX UTC time stamp indicating when the contacted peer first reported its
