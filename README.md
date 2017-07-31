@@ -427,7 +427,9 @@ connection failed.
 
 ``peer_ts``
 : A UNIX UTC time stamp indicating when the contacted peer first reported its
-existence to the peer locator (in seconds, number).
+existence to the peer locator (in seconds, number).  Together with
+``measurement_start_time`` it can be used to operate on the age of the contacted
+peer.
 
 ``peer_nat``
 : Whether the contacted peer claimed to be behind NAT to the peer locator
