@@ -158,8 +158,8 @@ With an NginX server:
 Enable the virtual host and reload NginX.  When nodes access the reporting
 URL, a new entry will reflect the provided data in the access log file.
 
-For instance, to get the IDs of nodes accessing reporting their addresses
-after May 10th 2017:
+For instance, to get the IDs of nodes reporting their addresses after May 10th
+2017:
 
     $ sudo cat /path/to/access.log | sed '\#\[11/May/2017#,$!d' \
       | sed -En 's#.*GET /addrs/\?n=([-0-9a-f]*)&.*#\1#p' | sort -u
