@@ -352,6 +352,33 @@ And allow the `ooni` user to make it permanent in the system by running as
 
     loginctl enable-linger ooni
 
+### Upgrade
+
+We use an incremental number suffix for the Python environment name of OONI
+backend upgrades.  Use the following command to see what the next version
+shoud be:
+
+    ls -d ~/venvs/ooni-backend-eq*
+
+Let's imagine that the last version is `ooni-backend-eq.41`, then set:
+
+    NEXT=42
+
+Use 1 if you have not yet installed any upgrade yet.  To upgrade:
+
+    virtualenv ~/venvs/ooni-backend-eq.$NEXT
+    . ~/venvs/ooni-backend-eq.$NEXT/bin/activate
+    pip install --upgrade setuptools
+    cd vc/git/ooni-backend-eq
+    git pull  # or fetch and checkout a particular version
+    pip install -r requirements.txt
+    python setup.py install
+    cd ~/venvs
+    systemctl --user stop oonib
+    rm ooni-backend-eq
+    ln -s ooni-backend-eq.$NEXT ooni-backend-eq
+    systemctl --user start oonib
+
 ## Administrative tools
 
 ### Testbed administration script
