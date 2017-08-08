@@ -158,8 +158,8 @@ With an NginX server:
 Enable the virtual host and reload NginX.  When nodes access the reporting
 URL, a new entry will reflect the provided data in the access log file.
 
-For instance, to get the IDs of nodes accessing reporting their addresses
-after May 10th 2017:
+For instance, to get the IDs of nodes reporting their addresses after May 10th
+2017:
 
     $ sudo cat /path/to/access.log | sed '\#\[11/May/2017#,$!d' \
       | sed -En 's#.*GET /addrs/\?n=([-0-9a-f]*)&.*#\1#p' | sort -u
@@ -352,6 +352,33 @@ And allow the `ooni` user to make it permanent in the system by running as
 
     loginctl enable-linger ooni
 
+### Upgrade
+
+We use an incremental number suffix for the Python environment name of OONI
+backend upgrades.  Use the following command to see what the next version
+shoud be:
+
+    ls -d ~/venvs/ooni-backend-eq*
+
+Let's imagine that the last version is `ooni-backend-eq.41`, then set:
+
+    NEXT=42
+
+Use 1 if you have not yet installed any upgrade yet.  To upgrade:
+
+    virtualenv ~/venvs/ooni-backend-eq.$NEXT
+    . ~/venvs/ooni-backend-eq.$NEXT/bin/activate
+    pip install --upgrade setuptools
+    cd vc/git/ooni-backend-eq
+    git pull  # or fetch and checkout a particular version
+    pip install -r requirements.txt
+    python setup.py install
+    cd ~/venvs
+    systemctl --user stop oonib
+    rm ooni-backend-eq
+    ln -s ooni-backend-eq.$NEXT ooni-backend-eq
+    systemctl --user start oonib
+
 ## Administrative tools
 
 ### Testbed administration script
@@ -409,3 +436,22 @@ An example of ``/etc/cron.d/testbed-update-data-pack``:
 Then run ``service cron reload`` to apply it.  Remember to protect the web
 directory with some kind of authorization if the tests may yield sensible
 data.
+
+## Troubleshooting and gotchas
+
+List of unexpected errors we encountered at eQualit.ie during setup and
+maintenance, related to system configuration and that may or may not happen.
+
+### Systemd errors
+
+When executing `systemctl --user enable portsplit` as user `portsplit` (or
+similar commands such as when enabling or starting the `oonib` service), you
+might encounter this error message: 
+
+    Failed to get D-Bus connection: Connection refused
+
+First make sure you did not `su` or `sudo` as the user (SSH directly to the host
+as that user). If the error keeps happening, you may need to install the package
+`libpam-systemd`. Then log out from your SSH session, make sure `screen` or
+`tmux` sessions are closed, and log back in. You should now be able to use user
+systemd units.

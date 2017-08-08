@@ -43,7 +43,7 @@ data_pack() {
 
     mkdir -p "$data_dir"
     ln -s "$TB_WEB_ACCESS_LOG" "$data_dir/web-access.log"
-    ln -s "$TB_OONI_DATA/peers.txt" "$data_dir/http-peers.txt"
+    ln -s "$TB_OONI_DATA/peers.txt" "$data_dir"
     ln -s "$TB_OONI_DATA/archive" "$data_dir/ooni-archive"
 
     if sudo tar -ch $data_comp -C "$tmp" "$(basename "$data_dir")" > "$data_arch"; then
