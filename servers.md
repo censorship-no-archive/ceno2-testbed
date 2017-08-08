@@ -436,3 +436,22 @@ An example of ``/etc/cron.d/testbed-update-data-pack``:
 Then run ``service cron reload`` to apply it.  Remember to protect the web
 directory with some kind of authorization if the tests may yield sensible
 data.
+
+## Troubleshooting and gotchas
+
+List of unexpected errors we encountered at eQualit.ie during setup and
+maintenance, related to system configuration and that may or may not happen.
+
+### Systemd errors
+
+When executing `systemctl --user enable portsplit` as user `portsplit` (or
+similar commands such as when enabling or starting the `oonib` service), you
+might encounter this error message: 
+
+    Failed to get D-Bus connection: Connection refused
+
+First make sure you did not `su` or `sudo` as the user (SSH directly to the host
+as that user). If the error keeps happening, you may need to install the package
+`libpam-systemd`. Then log out from your SSH session, make sure `screen` or
+`tmux` sessions are closed, and log back in. You should now be able to use user
+systemd units.
