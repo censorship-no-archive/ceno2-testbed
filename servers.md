@@ -407,7 +407,7 @@ We use an incremental number suffix for the Python environment name of OONI
 backend upgrades.  Use the following command to see what the next version
 shoud be:
 
-    ls -d ~/venvs/ooni-backend-eq*
+    ls -d ~/venvs/ooni-backend-eq* | sort -n -t. -k2
 
 Let's imagine that the last version is `ooni-backend-eq.41`, then set:
 
@@ -418,7 +418,7 @@ Use 1 if you have not yet installed any upgrade yet.  To upgrade:
     virtualenv ~/venvs/ooni-backend-eq.$NEXT
     . ~/venvs/ooni-backend-eq.$NEXT/bin/activate
     pip install --upgrade setuptools
-    cd vc/git/ooni-backend-eq
+    cd ~/vc/git/ooni-backend-eq
     git pull  # or fetch and checkout a particular version
     pip install -r requirements.txt
     python setup.py install
