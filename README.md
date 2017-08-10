@@ -497,6 +497,38 @@ This test is being run daily in the testbed at the same time in all nodes
 (1:53 UTC, save local clock inaccuracies), and it reports as
 ``p2p_bittorrent_test``.
 
+### NAT detection test
+
+The ``udp_nat_detection`` net test sends a specially formatted UDP datagram to
+each of a set of addresses called *main remotes*, and then expects responses
+from both the main remotes and optional *alternate remotes* which contain the
+transport address that the remotes see in the datagrams sent by this test
+instance.  The test records and reports all the received datagrams to enable the
+detection of the type of NAT before the probe.
+
+The test iself provides a guess of the type of NAT mapping and filtering,
+according to [RFC 4787](https://tools.ietf.org/html/rfc4787).  Since sent or
+received traffic may be lost for many reasons not related with NAT, the test is
+careful to only report facts that can be derived from the received traffic and
+not from its absence.
+
+The test report includes the following fields:
+
+``nat_type``
+: A guess of the type of NAT mapping and filtering from received traffic:
+``map:(endpoint-indep | addr-or-port-dep | uncertain)
+filter:(endpoint-indep | port-indep | probable | ignored)``.
+
+``data_received``
+: TBD <!--- XXXX --->
+
+(See the documentation of the
+``ooni.nettests.experimental.udp_nat_detection.NATDetectionTest`` for a full
+description of all fields.)
+
+This test is being run every XXXX hours in the testbed and it reports as
+``XXXX``. <!--- XXXX --->
+
 <!-- Local Variables: -->
 <!-- fill-column: 80 -->
 <!-- End: -->
