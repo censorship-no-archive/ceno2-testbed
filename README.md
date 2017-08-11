@@ -504,7 +504,7 @@ each of a set of addresses called *main remotes*, and then expects responses
 from both the main remotes and optional *alternate remotes* which contain the
 transport address that the remotes see in the datagrams sent by this test
 instance.  The test records and reports all the received datagrams to enable the
-detection of the type of NAT before the probe.
+detection of the type of NAT before the probe (if any).
 
 The test iself provides a guess of the type of NAT mapping and filtering,
 according to [RFC 4787](https://tools.ietf.org/html/rfc4787).  Since sent or
@@ -516,7 +516,7 @@ The test report includes the following fields:
 
 ``nat_type``
 : A guess of the type of NAT mapping and filtering from received traffic:
-``map:(endpoint-indep | addr-or-port-dep | uncertain)
+``map:(none | endpoint-indep | addr-or-port-dep | uncertain)
 filter:(endpoint-indep | port-indep | probable | ignored)``.
 
 ``data_received``
