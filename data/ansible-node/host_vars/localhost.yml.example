@@ -13,6 +13,10 @@ op_schedule:
   p2p_bittorrent:
     fixed_utc: '2332'  # at 23:32 UTC
     minute: "02,17,32,47"  # the minutes above and +15, +30, +45 minutes (MOD 60)
+  # This test will run at the given *local* times.
+  nat_detection:
+    hour: "5,13,21"  # exact hours, 8 hours apart here
+    minute: 23  # exact minute
 
 # URLs which just report the visiting IP address as text.
 ip4_guessing_url: ['https://myipaddress.example/', 'http://whoami.example/']

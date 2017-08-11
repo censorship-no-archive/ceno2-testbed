@@ -530,8 +530,8 @@ Please see the documentation of the
 ``ooni.nettests.experimental.udp_nat_detection.NATDetectionTest`` class for a
 full description of all fields.
 
-This test is being run every XXXX hours in the testbed and it reports as
-``XXXX``. <!--- XXXX --->
+This test is being run every 8 hours in the testbed and it reports as
+``nat_detection_test``.
 
 <!-- Local Variables: -->
 <!-- fill-column: 80 -->
