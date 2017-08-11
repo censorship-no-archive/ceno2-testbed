@@ -3,3 +3,5 @@
 PROBE_VENV=/root/venvs/ooniprobe
 PROBE_BACKENDS="{{ooni_peerlocator_helper | join(' ')}}"
 PROBE_PEERLIST=/root/peer_list.txt
+NATDET_MAIN_REMOTES="{{ooni_natdet_main_remotes | join(',')}}"
+NATDET_ALT_REMOTES="{{ooni_natdet_alt_remotes | join(',')}}"

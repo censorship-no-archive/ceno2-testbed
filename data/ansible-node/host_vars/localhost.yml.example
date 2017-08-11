@@ -24,6 +24,14 @@ tnl_ooni_collector_port: 12345
 # This must be a clearnet or the reporting of peers will not work.
 ooni_peerlocator_helper: ['192.0.2.1:56789']
 
+# The IP+PORT where OONI NAT detection main remotes listen.
+# At least two remotes with different IP addresses must be given.
+ooni_natdet_main_remotes: ['192.0.2.1:12345', '192.0.2.20:54321']
+# The IP+PORT where OONI NAT detection alternate remotes listen (may be empty).
+# Try to include at least one with just a different port than a main remote
+# and one with a different IP (but in both cases still handled by one of their helpers).
+ooni_natdet_alt_remotes: ['192.0.2.1:12321', '192.0.2.21:13579']
+
 # Optional Tor bridges to be used by nodes by default (see `Bridge` in `torrc(5)`).
 tor_bridges:
   - fingerprint: 0123456789ABCDEFFEDCBA987654321001234567
