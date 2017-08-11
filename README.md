@@ -514,17 +514,21 @@ not from its absence.
 
 The test report includes the following fields:
 
+``data_received``
+: An array of all the datagrams received, summarized per payload and source, in
+order of first arrival and source.  Each entry contains keys for the (maybe
+truncated) ``data``, ``source_addr``, a ``count`` of the same payload/source
+occurrences, and time stamps for the first and last ones.  A probe guess on the
+validity of the datagram is included as ``probe_decision``.
+
 ``nat_type``
-: A guess of the type of NAT mapping and filtering from received traffic:
-``map:(none | endpoint-indep | addr-or-port-dep | uncertain)
+: A guess of the type of NAT mapping and filtering from received traffic
+(string): ``map:(none | endpoint-indep | addr-or-port-dep | uncertain)
 filter:(endpoint-indep | port-indep | probable | ignored)``.
 
-``data_received``
-: TBD <!--- XXXX --->
-
-(See the documentation of the
-``ooni.nettests.experimental.udp_nat_detection.NATDetectionTest`` for a full
-description of all fields.)
+Please see the documentation of the
+``ooni.nettests.experimental.udp_nat_detection.NATDetectionTest`` class for a
+full description of all fields.
 
 This test is being run every XXXX hours in the testbed and it reports as
 ``XXXX``. <!--- XXXX --->
