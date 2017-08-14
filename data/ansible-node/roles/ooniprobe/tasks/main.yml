@@ -81,7 +81,7 @@
   git:
     repo: https://github.com/equalitie/ooni-probe
     dest: /root/ooniprobe-git/
-    version: 33adbfa58cdfa82e087c1695103179e1070b42ea
+    version: 0376fc0892f68adbbf064310515cb15e6e0afc35
 
 - name: Install some python dependencies that ooniprobe does not seem to know about
   pip:
@@ -160,6 +160,7 @@
     - op-peer_locator.sh
     - op-peer_http_reachable.sh
     - op-p2p_bittorrent.sh
+    - op-nat_detection.sh
 
 - name: Set daily cron task for peer locator
   cron:
@@ -201,6 +202,21 @@
     state: present
     hour: "{{op_schedule.p2p_bittorrent.hour|default('*')}}"
     minute: "{{op_schedule.p2p_bittorrent.minute|default('*')}}"
+    user: root
+
+- name: Set UTC time condition for nat_detection OONI test
+  set_fact:
+    nat_detection_condition: "[ $(date -u +\\%H\\%M) = {{op_schedule.nat_detection.fixed_utc}} ] && "
+  when: op_schedule.nat_detection.fixed_utc is defined
+
+- name: Set cron task for nat detection test
+  cron:
+    name: ooniprobe nat detection
+    job: "{{nat_detection_condition|default('')}}/usr/local/bin/op-nat_detection.sh"
+    cron_file: ooniprobe_nat_detection
+    state: present
+    hour: "{{op_schedule.nat_detection.hour|default('*')}}"
+    minute: "{{op_schedule.nat_detection.minute|default('*')}}"
     user: root
 
 - name: Parse our PGP public key file

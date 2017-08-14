@@ -13,6 +13,10 @@ op_schedule:
   p2p_bittorrent:
     fixed_utc: '2332'  # at 23:32 UTC
     minute: "02,17,32,47"  # the minutes above and +15, +30, +45 minutes (MOD 60)
+  # This test will run at the given *local* times.
+  nat_detection:
+    hour: "5,13,21"  # exact hours, 8 hours apart here
+    minute: 23  # exact minute
 
 # URLs which just report the visiting IP address as text.
 ip4_guessing_url: ['https://myipaddress.example/', 'http://whoami.example/']
@@ -23,6 +27,14 @@ tnl_ooni_collector_port: 12345
 # The IP+PORT where the OONI HTTP peer locator helper listens.
 # This must be a clearnet or the reporting of peers will not work.
 ooni_peerlocator_helper: ['192.0.2.1:56789']
+
+# The IP+PORT where OONI NAT detection main remotes listen.
+# At least two remotes with different IP addresses must be given.
+ooni_natdet_main_remotes: ['192.0.2.1:12345', '192.0.2.20:54321']
+# The IP+PORT where OONI NAT detection alternate remotes listen (may be empty).
+# Try to include at least one with just a different port than a main remote
+# and one with a different IP (but in both cases still handled by one of their helpers).
+ooni_natdet_alt_remotes: ['192.0.2.1:12321', '192.0.2.21:13579']
 
 # Optional Tor bridges to be used by nodes by default (see `Bridge` in `torrc(5)`).
 tor_bridges:

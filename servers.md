@@ -319,7 +319,7 @@ Copy `oonib.conf.example` to `oonib.conf` and edit it. Assuming the user running
     - `{type: tcp, port: 11080, address: '::'}`
     - `{type: onion, hsdir: /home/ooni/oonibackend_hidden_services/collector}`
 - `port` for all helpers should be set to `null` to deactivate them, except for
-  `peer-locator`.
+  `peer-locator` and `nat-detection` (main and alternate endpoints).
 
 You may need to edit the file `data/policy.yaml` to make sure that the tests
 names and versions as sent by the probes will be accepted by the backend. A HTTP
@@ -352,13 +352,62 @@ And allow the `ooni` user to make it permanent in the system by running as
 
     loginctl enable-linger ooni
 
+### Denial-of-service protection for UDP-based service
+
+One of our custom helpers aims at allowing nodes detect which type of NAT they
+are behind, if any. It listens on a UDP port and, when receiving a properly
+formatted request, replies to the client with a single packet containing what
+the client's originating IP address and port looks like. On the nodes, the
+client side runs as a OONI probe test. On the server side, it is for now only a
+standalone program, but will be integrated as a OONI backend helper.
+
+For clients to collect enough data to detect NAT types, this helper must run on
+(at least) two distinct servers, or on a server that has (at least) two distinct
+IP addresses. Clients will contact both and compare the replies to try to guess
+the NAT type, as defined in [section
+4](https://tools.ietf.org/html/rfc4787#section-4) of RFC 4787.
+
+Since we use UDP, it is easy for attackers to trigger this helper in sending
+unsollicited packets to arbitrary victims by spoofing the origin IP and port (a
+common technique used for instance in DNS amplification attacks), potentially at
+very high rate.
+
+Consequently, you may want to use `iptables` to rate-limit the input traffic and
+block packets from a specific IP address if too many are arriving too fast. The
+`hashlimit` module is designed for that. Assuming your UDP helper runs on port
+12345, the following command will make the kernel ignore UDP packets to port
+12345 from any peer sending at more than 5 packets per minute to that:
+
+    iptables -A INPUT -p udp --dport 12345 -m hashlimit \
+             --hashlimit-name nat-detect-helper-12345-v4 \
+             --hashlimit-above 5/minute --hashlimit-mode srcip,dstip \
+             --hashlimit-burst 5 --hashlimit-srcmask 32 -j DROP
+
+`ip6tables` also supports this option with the same syntax. However, since IPv6
+addresses have 128 bits and end-users usually have /64 or /56 prefixes, you may
+want to set the `--hashlimit-srcmask` option to 56 and/or 64:
+
+    ip6tables -A INPUT -p udp --dport 12345 -m hashlimit \
+              --hashlimit-name nat-detect-helper-12345-v6 \
+              --hashlimit-above 5/minute --hashlimit-mode srcip,dstip \
+              --hashlimit-burst 5 --hashlimit-srcmask 64 -j DROP
+
+Make sure each `hashlimit` rule you add has a unique name, defined with the
+option `--hashlimit-name`.
+
+Save these rules to make them active at next reboot (you may need to install the
+`iptables-persistent` package):
+
+    iptables-save >/etc/iptables/rules.v4
+    ip6tables-save >/etc/iptables/rules.v6
+
 ### Upgrade
 
 We use an incremental number suffix for the Python environment name of OONI
 backend upgrades.  Use the following command to see what the next version
 shoud be:
 
-    ls -d ~/venvs/ooni-backend-eq*
+    ls -d ~/venvs/ooni-backend-eq* | sort -n -t. -k2
 
 Let's imagine that the last version is `ooni-backend-eq.41`, then set:
 
@@ -369,7 +418,7 @@ Use 1 if you have not yet installed any upgrade yet.  To upgrade:
     virtualenv ~/venvs/ooni-backend-eq.$NEXT
     . ~/venvs/ooni-backend-eq.$NEXT/bin/activate
     pip install --upgrade setuptools
-    cd vc/git/ooni-backend-eq
+    cd ~/vc/git/ooni-backend-eq
     git pull  # or fetch and checkout a particular version
     pip install -r requirements.txt
     python setup.py install
