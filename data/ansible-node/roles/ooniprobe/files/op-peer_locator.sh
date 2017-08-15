@@ -11,5 +11,6 @@ for BACKEND in $PROBE_BACKENDS; do
   python -m ooni.scripts.ooniprobe -n "$TEST_FILE" \
       --backend="$BACKEND" \
       --peer_list="$PROBE_PEERLIST" \
-      --http_port=random
+      --http_port=random \
+      "$@"
 done

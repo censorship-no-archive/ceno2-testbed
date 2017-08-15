@@ -364,8 +364,8 @@ standalone program, but will be integrated as a OONI backend helper.
 For clients to collect enough data to detect NAT types, this helper must run on
 (at least) two distinct servers, or on a server that has (at least) two distinct
 IP addresses. Clients will contact both and compare the replies to try to guess
-the NAT type, as defined in [section
-4](https://tools.ietf.org/html/rfc4787#section-4) of RFC 4787.
+the NAT type, as defined in
+[section 4](https://tools.ietf.org/html/rfc4787#section-4) of RFC 4787.
 
 Since we use UDP, it is easy for attackers to trigger this helper in sending
 unsollicited packets to arbitrary victims by spoofing the origin IP and port (a
@@ -378,8 +378,10 @@ block packets from a specific IP address if too many are arriving too fast. The
 12345, the following command will make the kernel ignore UDP packets to port
 12345 from any peer sending at more than 5 packets per minute to that:
 
+    iptables -A INPUT -m comment --comment \
+             "IPv4 NAT detection helper on UDP port 12345"
     iptables -A INPUT -p udp --dport 12345 -m hashlimit \
-             --hashlimit-name nat-detect-helper-12345-v4 \
+             --hashlimit-name natdet-v4-12345 \
              --hashlimit-above 5/minute --hashlimit-mode srcip,dstip \
              --hashlimit-burst 5 --hashlimit-srcmask 32 -j DROP
 
@@ -387,8 +389,10 @@ block packets from a specific IP address if too many are arriving too fast. The
 addresses have 128 bits and end-users usually have /64 or /56 prefixes, you may
 want to set the `--hashlimit-srcmask` option to 56 and/or 64:
 
+    ip6tables -A INPUT -m comment --comment \
+              "IPv6 NAT detection helper on UDP port 12345"
     ip6tables -A INPUT -p udp --dport 12345 -m hashlimit \
-              --hashlimit-name nat-detect-helper-12345-v6 \
+              --hashlimit-name natdet-v6-12345 \
               --hashlimit-above 5/minute --hashlimit-mode srcip,dstip \
               --hashlimit-burst 5 --hashlimit-srcmask 64 -j DROP
 

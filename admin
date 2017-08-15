@@ -11,6 +11,15 @@ TB_PSSH_SSH_OPTS="${TB_PSSH_SSH_OPTS:--o StrictHostKeyChecking=no -o UserKnownHo
 export LC_TIME=C
 
 
+# Print oldest-to-newest list of ``UTC_ISO_DATE NODE_ID`` occurrences in the log,
+# i.e. show which nodes where available on which days.
+nodes_history() {
+    sudo cat  "$TB_WEB_ACCESS_LOG" \
+        | sed -En 's#^[^[]+\[([0-9]+)/([a-zA-Z]+)/([0-9]+):[^]]+\].*\bGET /addrs/\?n=([-0-9a-f]+)\b.*#\1-\2-\3 \4#p' \
+        | { while read l; do echo "$(date -d "${l% *}" -uI) ${l#* }"; done } \
+        | sort -u
+}
+
 # Print ``n=NODE_ID a=NODE_ADDR1/NODE_PFX1 a=NODE_ADDR2/NODE_PFX2... i4=NODE_PUB_ADDR``
 # for each node which reported today.
 nodes_addrs() {
@@ -59,9 +68,9 @@ cmd="$1"
 test "$cmd" && shift
 
 case "$cmd" in
-    (nodes_addrs|nodes_cjdns_addrs|nodes_exec|data_pack)
+    (nodes_history|nodes_addrs|nodes_cjdns_addrs|nodes_exec|data_pack)
         $cmd "$@"
         ;;
-    (*) echo "Usage: $(basename "$0") nodes_addrs|nodes_cjdns_addrs|nodes_exec|data_pack ARG..." >&2  ##XXXX enhance
+    (*) echo "Usage: $(basename "$0") nodes_history|nodes_addrs|nodes_cjdns_addrs|nodes_exec|data_pack ARG..." >&2  ##XXXX enhance
         exit 1
 esac
