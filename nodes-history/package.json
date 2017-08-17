@@ -1,0 +1,14 @@
+{
+  "name": "testbed-nodes-history",
+  "version": "0.0.1",
+  "description": "Testbed nodes history viewer",
+  "main": "index.js",
+  "scripts": {
+    "test": "true"
+  },
+  "author": "eQualit.ie",
+  "license": "private",
+  "dependencies": {
+    "event-drops": "^0.2.0"
+  }
+}
