@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Testbed nodes history</title>
+        <script src="d3.js"></script>
+        <script src="eventDrops.js"></script>
+    </head>
+    <body>
+        <h1>Testbed nodes history</h1>
+        <div id="chart_placeholder"></div>
+    </body>
+    <script>
+fetch("nodes-history.json")
+  .then(response => response.json())
+  .then(json => {
+    var data = [];
+    json.forEach(({name, dates}) => {
+      var new_dates = [];
+      dates.forEach(date =>
+        new_dates.push(new Date(date))
+      );
+      data.push({name: name, dates: new_dates});
+    });
+    return data;
+  })
+  .then(data => {
+    var eventDropsChart = d3.chart.eventDrops()
+      .start(new Date("2017-05-01"))
+      .width(2000);
+    d3.select('#chart_placeholder')
+      .datum(data)
+      .call(eventDropsChart);
+  });
+    </script>
+</html>
