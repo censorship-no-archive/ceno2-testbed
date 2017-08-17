@@ -7,7 +7,7 @@
     "test": "true"
   },
   "author": "eQualit.ie",
-  "license": "private",
+  "license": "BSD-3-Clause",
   "dependencies": {
     "event-drops": "^0.2.0"
   }
