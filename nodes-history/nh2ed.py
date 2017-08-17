@@ -29,6 +29,8 @@ def main():
 
     nid2dates = defaultdict(list)
     for line in sys.stdin:
+        if line.startswith('#'):
+            continue
         (date, node_id) = line.split()
         nid2dates[node_id].append(date)
 

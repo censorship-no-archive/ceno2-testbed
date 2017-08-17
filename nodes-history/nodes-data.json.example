@@ -1,0 +1,22 @@
+[
+  {
+    "id": "cc708bab-b696-4da6-ac40-176fa87d2493",
+    "owner": "Alice",
+    "cjdns_ipv6": "fc90:c6e0:1161:bc46:e510:437c:cffb:708a",
+    "onioncat_ipv6": "fd87:d87e:eb43:b0d6:a927:85cc:df6d:3dde",
+    "country": "US",
+    "as": 12345,
+    "blacklist_reason": null,
+    "comments": "Some testbed node"
+  },
+  {
+    "id": "8cf67242-4d4f-400f-965b-81d52521b4ab",
+    "owner": "Bob",
+    "cjdns_ipv6": "fc2c:53d6:8af:833f:dd8d:6b60:9f32:5057",
+    "onioncat_ipv6": "fd87:d87e:eb43:c2ff:e958:f54b:dae5:9a1c",
+    "country": null,
+    "as": null,
+    "blacklist_reason": "Test node",
+    "comments": "A test machine not to be taken into account"
+  }
+]

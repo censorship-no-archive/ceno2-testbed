@@ -1,0 +1,8 @@
+# A ``DATE NODE_ID`` entry
+# for each day that the node reported back to the server
+# (as produced by ``admin nodes_history``).
+2017-08-15 8cf67242-4d4f-400f-965b-81d52521b4ab
+2017-08-15 cc708bab-b696-4da6-ac40-176fa87d2493
+2017-08-16 8cf67242-4d4f-400f-965b-81d52521b4ab
+2017-08-16 cc708bab-b696-4da6-ac40-176fa87d2493
+2017-08-16 6d7b98a8-c77f-4ec3-8faf-7a83b5ce8d53
