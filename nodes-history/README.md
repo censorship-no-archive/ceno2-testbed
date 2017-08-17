@@ -22,5 +22,7 @@ You need to install package dependencies first using NPM in this directory
 
         $ python nh2ed.py /path/to/nodes-data.json < nodes-history.txt > nodes-history.json
 
+    Examples of the format of the data and history files are available.
+
  3. Publish ``index.html``, ``nodes-history.json``, ``d3.js`` and ``eventDrops.js``,
     or just open ``index.html`` locally.
