@@ -4,6 +4,9 @@ This offers a very simple, web-based viewer for the historical availability of
 testbed nodes as a series of time-based events.  It is based on the package
 [EventDrops](https://github.com/marmelab/EventDrops).
 
+Nodes are named using the first letter of their owner (or ``?`` if unknown)
+and the first fragment of their UUID.
+
 You need to install package dependencies first using NPM in this directory
 (you only need to do it once):
 
