@@ -1,12 +1,13 @@
 # Testbed nodes history viewer
 
 This offers a very simple, web-based viewer for the historical availability of
-testbed nodes.
+testbed nodes as a series of time-based events.  It is based on the package
+[EventDrops](https://github.com/marmelab/EventDrops).
 
-You need to install the [EventDrops](https://github.com/marmelab/EventDrops)
-package first using NPM in this directory (you only need to do it once):
+You need to install package dependencies first using NPM in this directory
+(you only need to do it once):
 
-    $ npm install event-drops
+    $ npm install
 
 ## Usage
 
