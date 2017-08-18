@@ -69,9 +69,11 @@ fi
 rm -f "$SSHHOSTSTMP_PATH"
 
 # Synchronize node data files from server.
+# Throttle to 20 KiB/s to avoid causing a bandwidth consumption spike
+# (it still allows downloading more than 10 MiB in 10 minutes).
 NODEDATA_PATH=/var/local/lib/node-data
 mkdir -p -m 0700 "$NODEDATA_PATH"  # there may be sensitive files
-tnldo sh -c 'rsync -r node-data@$TNL_ADDR_BKT: '"$NODEDATA_PATH"
+tnldo sh -c 'rsync -r --bwlimit=20k node-data@$TNL_ADDR_BKT: '"$NODEDATA_PATH"
 chmod go-rwx "$NODEDATA_PATH"  # just in case
 
 # Run local Ansible playbook if present in node data.
