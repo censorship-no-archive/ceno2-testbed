@@ -238,7 +238,7 @@ Copy *node* root's private SSH key under the `root`'s home:
 
 Test it (and add the SSH host key if needed) with:
 
-    $ sudo rsync -e "ssh -i /root/testbed-data/ssh/node-root/id_rsa" -r node-data@SERVER: /usr/local/lib/node-data
+    $ sudo rsync -e "ssh -i /root/testbed-data/ssh/node-root/id_rsa" --delete -r node-data@SERVER: /usr/local/lib/node-data
 
 Replacing `SERVER` with the host name of your actual server.  If working, add
 the following script `/etc/cron.d/node-data-sync` (remember to replace
@@ -249,7 +249,7 @@ the following script `/etc/cron.d/node-data-sync` (remember to replace
 SHELL=/bin/sh
 PATH=/bin:/usr/bin
 
-*/47 * * * *  root  rsync -e "ssh -i /root/testbed-data/ssh/node-root/id_rsa" -r node-data@SERVER: /usr/local/lib/node-data
+*/47 * * * *  root  rsync -e "ssh -i /root/testbed-data/ssh/node-root/id_rsa" --delete -r node-data@SERVER: /usr/local/lib/node-data
 ```
 
 And reload Cron:
