@@ -112,3 +112,8 @@
 
 - name: Enable the cjdns service
   service: name=cjdns enabled=true
+  when: not dormant
+
+- name: Disable and stop cjdns on a dormant testbed
+  service: name=cjdns enabled=false state=stopped
+  when: dormant
