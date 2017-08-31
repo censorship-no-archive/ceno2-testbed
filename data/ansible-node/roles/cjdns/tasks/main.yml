@@ -103,12 +103,12 @@
     - "jq"
 
 - name: Copy cjdns peer injection script
-  copy: src=cjdns-inject-connectto dest=/usr/local/bin/cjdns-inject-connectto owner=root group=root mode=0755
+  copy: src=cjdns-inject-connectto dest=/usr/local/sbin/cjdns-inject-connectto owner=root group=root mode=0755
   notify:
     - restart cjdns
 
 - name: Run cjdns peer injection script
-  command: /usr/local/bin/cjdns-inject-connectto
+  command: /usr/local/sbin/cjdns-inject-connectto
 
 - name: Enable the cjdns service
   service: name=cjdns enabled=true
