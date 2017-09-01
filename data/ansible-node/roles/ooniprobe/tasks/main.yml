@@ -168,15 +168,9 @@
     job: /usr/local/bin/op-peer_locator.sh
     cron_file: ooniprobe_peer_locator
     state: present
-    disabled: no
+    disabled: "{{dormant}}"
     special_time: daily
     user: root
-
-- name: Disable peer locator test on a dormant testbed
-  cron:
-    name: ooniprobe peer locator
-    disabled: yes
-  when: dormant
 
 - name: Set daily cron task for cleanup of peer locator servers
   copy: src=op-http-peer-cleanup.cron-daily dest=/etc/cron.daily/op-http-peer-cleanup owner=root group=root mode=0755
@@ -192,16 +186,10 @@
     job: "{{peer_http_reachable_condition|default('')}}/usr/local/bin/op-peer_http_reachable.sh"
     cron_file: ooniprobe_http_reachable
     state: present
-    disabled: no
+    disabled: "{{dormant}}"
     hour: "{{op_schedule.peer_http_reachable.hour|default('*')}}"
     minute: "{{op_schedule.peer_http_reachable.minute|default('*')}}"
     user: root
-
-- name: Disable http reachability test on a dormant testbed
-  cron:
-    name: ooniprobe http reachability
-    disabled: yes
-  when: dormant
 
 - name: Set UTC time condition for p2p_bittorrent OONI test
   set_fact:
@@ -214,16 +202,10 @@
     job: "{{p2p_bittorrent_condition|default('')}}/usr/local/bin/op-p2p_bittorrent.sh"
     cron_file: ooniprobe_p2p_bittorrent
     state: present
-    disabled: no
+    disabled: "{{dormant}}"
     hour: "{{op_schedule.p2p_bittorrent.hour|default('*')}}"
     minute: "{{op_schedule.p2p_bittorrent.minute|default('*')}}"
     user: root
-
-- name: Disable p2p test on a dormant testbed
-  cron:
-    name: ooniprobe p2p test
-    disabled: yes
-  when: dormant
 
 - name: Set UTC time condition for nat_detection OONI test
   set_fact:
@@ -236,16 +218,10 @@
     job: "{{nat_detection_condition|default('')}}/usr/local/bin/op-nat_detection.sh"
     cron_file: ooniprobe_nat_detection
     state: present
-    disabled: no
+    disabled: "{{dormant}}"
     hour: "{{op_schedule.nat_detection.hour|default('*')}}"
     minute: "{{op_schedule.nat_detection.minute|default('*')}}"
     user: root
-
-- name: Disable peer nat detection test on a dormant testbed
-  cron:
-    name: ooniprobe nat detection
-    disabled: yes
-  when: dormant
 
 - name: Parse our PGP public key file
   shell: gpg --fixed-list-mode --with-fingerprint --with-colons roles/ooniprobe/files/ooni-backup-pub.asc | sed -E '/^fpr/!d;s/^fpr:+([0-9A-F]{40}):$/\1/;q'
