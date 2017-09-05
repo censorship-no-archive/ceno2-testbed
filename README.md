@@ -74,6 +74,13 @@ initial deployment, like pushing hotfixes and downloading and applying
 a node.  When downloading the script, nodes also report their local, VPN and
 public IP addresses to servers for management purposes.
 
+The Ansible configuration can be used to put the testbed into *dormant state*,
+in which minimal VPN connectivity is provided and the execution of tests is
+disabled so that nodes have very low resource requirements.  Nodes still
+periodically report their addresses and run the maintenance script, which allows
+to use Ansible to bring the testbed back from dormant state into active state so
+that tests can run again.
+
 ### The simulator
 
 We have also developed a simple [simulator][].  Its main purpose is to reproduce
@@ -443,12 +450,12 @@ This test is being run every 6 hours in the testbed and it reports as
 The ``p2p_bittorrent_test`` net test simply invokes a script that runs an
 instrumented version of the [Transmission](https://transmissionbt.com/)
 BitTorrent client.  The command-line version of the client is started with a
-given torrent file that instructs it to download the files associated with it.
-While the client is running, certain events are logged to a JSON-like document
-named ``transmission-instrumentation.log.json`` in the current working
-directory.  When the client finishes its downloads, it exits and the JSON
-document is dumped.  This helps detect P2P protocol interference.
-<!--- XXXX review, extend --->
+given torrent file that instructs it to download the files associated with it,
+followed by seeding the files for some time. While the client is running,
+certain events are logged to a JSON-like document named
+``transmission-instrumentation.log.json`` in the current working directory.
+When the client finishes its downloads, it exits and the JSON document is
+dumped.  This helps detect P2P protocol interference.
 
 Given a report retrieved from an OONI backend server as ``REPORT.json``, this
 command (which uses the [jq](https://stedolan.github.io/jq/) processor) can be
@@ -456,46 +463,79 @@ run to get a pretty-prined version of the output produced by the test:
 
     jq -r '.test_keys.commands[0].command_stdout' REPORT.json | jq .
 
-The output consists of an array of events as objects with a ``timestamp`` key
-and a string value showing the Unix timestamp (UTC, seconds) of the event, and a
-``type`` key indicating the kind of event:
+The instrumentation collects a record of peer-to-peer network events involved
+in downloading or seeding a torrent file. Together, this information makes it
+possible to reconstruct a log of network activities attempted by the bittorrent
+client, as well as the degree to which these activities succeeded.
 
-``dht-own-id``
-: The ``my-id`` fields contains the node's own SHA-1 identifier in the DHT (hex
-string).
+The instrumentation record is implemented as a running sequence of network
+events, each represented as a JSON object. Instrumentation records are
+represented as JSON objects containing a ``type`` field describing the type of
+event, a ``timestamp`` float UNIX timestamp recording the time of the event, as
+well as a collection of type-specific fields. Seven different types of events
+are recorded:
 
-``dht-add-node``
-: The node added a peer with ``peer-address`` SHA-1 identifier (string) at IP
-``peer-address`` (string) and port ``peer-port``  (number).
+  - ``connection-start``: Emitted whenever a peer-to-peer bittorrent data
+    transfer connection is attempted. This does not necessarily mean the
+    connection gets established successfully.
+    - ``peer-address``, ``peer-port``: The IP address and TCP/UDP port of the
+      node on the other side of the connection.
+    - ``incoming``: True if the connection was established by the other party.
+      False otherwise.
+    - ``ledbat``: True if the connection is a LEDBAT UDP connection. False
+      otherwise.
+  - ``connection-end``: Emitted when a peer-to-peer bittorrent data transfer
+    connection is closed. This can be a connection closed voluntarily by one of
+    its parties after transferring a certain amount of data; a connection closed
+    by some network error at any time; or a connection that never got
+    established in the first place, which is cancelled by its initiator.
+    - ``peer-address``, ``peer-port``: As for connection-start.
+    - ``bytes-sent``, ``bytes-received``: The amount of torrent PAYLOAD data
+      transmitted over the connection.
+    - ``encrypted``: True if opportunistic protocol encryption was used for this
+      connection, false otherwise. Because this proposition only gets negotiated
+      after a connection is established, this field will always be False for
+      attempted connections that never got off the ground.
+    - ``reason-error``: True if the connection get terminated because of some
+      network error, such as a connection-reset or a timeout. This generally
+      includes connections that get dropped before ever being established.
+  ``dht-rpc-request``: Emitted when Transmission sends a DHT requests to one of
+    the nodes in its DHT routing table.
+    - ``peer-address``, ``peer-port``: As for connection-start.
+    - ``peer-id``: The DHT ID of the peer to which the DHT request is sent.
+    - ``rpc-type``: The type of DHT request sent. One of (*find_node*,
+      *get_peers*, *announce_peer*).
+  ``dht-rpc-reply``: Emitted when Transmission receives a reply to a DHT request
+    described by a ``dht-rpc-request`` event.
+    - ``peer-address``, ``peer-port``, ``peer-id``, ``rpc-type``: As above.
+  ``dht-add-node``: Emitted when Transmission adds a new peer to its DHT routing
+    table.
+    - ``peer-address``, ``peer-port``, ``peer-id``: As above.
+  ``dht-displace-node``: Emitted when Transmission removes a peer from its DHT
+    routing table to make room for a new entry.
+    - ``peer-address``, ``peer-port``, ``peer-id``: Details of the removed peer.
+  ``dht-own-id``: At the start of a Transmission run, is emitted to describe the
+    user's own DHT ID.
+    ``peer-id``: The user's own DHT ID.
 
-``dht-displace-node``
-: The node was to change the address of the peer with ``peer-address`` SHA-1
-identifier (string) which had IP ``peer-address`` (string) and port
-``peer-port`` (number). <!--- XXXX verify --->
+Each ``connection-end`` event should be associated with a corresponding
+``connection-start`` event, but not vice versa: there can be ``connection-start``
+events that never got finalized properly. Similarly, each ``dht-rpc-reply``
+should match exactly one ``dht-rpc-request``, but not all requests necessarily
+receive a reply.
 
-``dht-rpc-request``
-: The node sent an RPC request of ``rpc-type`` (*find_node*, *get_peers*,
-*announce_peer*) to the peer with ``peer-address`` SHA-1 identifier (string) at
-IP ``peer-address``  (string) and port ``peer-port`` (number). <!--- XXXX verify --->
+By matching ``connection-end`` events to ``connection-start`` events that have
+the same ``peer-address`` and ``peer-port``, a record of the complete connection
+can be reconstructed. That record includes the total connection duration,
+computed as the difference between the end-event timestamp and the start-event
+timestamp. Similarly, ``dht-rpc-reply`` events can be matched to
+``dht-rpc-request`` events with matching ``peer-address``, ``peer-port``, and
+``peer-id``.
 
-``dht-rpc-reply``
-: The node received an RPC reply of ``rpc-type`` (*find_node*, *get_peers*,
-*announce_peer*) from the peer with ``peer-address`` SHA-1 identifier (string)
-at IP ``peer-address``  (string) and port ``peer-port`` (number). <!--- XXXX verify --->
-
-``connection-start``
-: A new connection with IP ``peer-address`` (string) and port ``peer-port``
-(number), using ``ledbat`` or not (boolean), ``incoming`` or not (boolean).
-
-``connection-end``
-: A connection teardown with IP ``peer-address`` (string) and port ``peer-port``
-(number), after exchanging ``bytes-sent`` and ``bytes-received`` (numbers),
-``encrypted`` or not (boolean), with ``reason-error`` set if it was caused by an
-error (boolean).
-
-This test is being run daily in the testbed at the same time in all nodes
-(1:53 UTC, save local clock inaccuracies), and it reports as
-``p2p_bittorrent_test``.
+By performing this matching, logged events can be reconstructed into a collection
+of completed connections, and a separate collection of connection attempts that
+never got finalized or cleaned up. Similarly, DHT requests can be categorized
+into answered and unanswered requests.
 
 ### NAT detection test
 

@@ -7,3 +7,8 @@
 - name: "Fix peer locator's test peer list file in case it contains bogus entries"
   command: "sed -Ei '/^(()|(#.*)|([0-9]+\\.[0-9]+ ([.0-9]+|\\[[:0-9a-f]+\\]):[0-9]+ [A-Z]+( [_a-z]+)*))$/!s/^/## /' /root/peer_list.txt"
   ignore_errors: true
+
+- name: "Remove misplaced cjdns peer injection script"
+  file:
+    path: /usr/local/bin/cjdns-inject-connectto
+    state: absent
