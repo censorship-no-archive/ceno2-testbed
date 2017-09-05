@@ -2,3 +2,4 @@
 
 - name: restart cjdns
   service: name=cjdns state=restarted
+  when: not dormant

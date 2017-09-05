@@ -168,6 +168,7 @@
     job: /usr/local/bin/op-peer_locator.sh
     cron_file: ooniprobe_peer_locator
     state: present
+    disabled: "{{dormant}}"
     special_time: daily
     user: root
 
@@ -185,6 +186,7 @@
     job: "{{peer_http_reachable_condition|default('')}}/usr/local/bin/op-peer_http_reachable.sh"
     cron_file: ooniprobe_http_reachable
     state: present
+    disabled: "{{dormant}}"
     hour: "{{op_schedule.peer_http_reachable.hour|default('*')}}"
     minute: "{{op_schedule.peer_http_reachable.minute|default('*')}}"
     user: root
@@ -200,6 +202,7 @@
     job: "{{p2p_bittorrent_condition|default('')}}/usr/local/bin/op-p2p_bittorrent.sh"
     cron_file: ooniprobe_p2p_bittorrent
     state: present
+    disabled: "{{dormant}}"
     hour: "{{op_schedule.p2p_bittorrent.hour|default('*')}}"
     minute: "{{op_schedule.p2p_bittorrent.minute|default('*')}}"
     user: root
@@ -215,6 +218,7 @@
     job: "{{nat_detection_condition|default('')}}/usr/local/bin/op-nat_detection.sh"
     cron_file: ooniprobe_nat_detection
     state: present
+    disabled: "{{dormant}}"
     hour: "{{op_schedule.nat_detection.hour|default('*')}}"
     minute: "{{op_schedule.nat_detection.minute|default('*')}}"
     user: root
