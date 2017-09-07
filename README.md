@@ -492,24 +492,24 @@ are recorded:
     - ``reason-error``: True if the connection get terminated because of some
       network error, such as a connection-reset or a timeout. This generally
       includes connections that get dropped before ever being established.
-  ``dht-rpc-request``: Emitted when Transmission sends a DHT requests to one of
+  - ``dht-rpc-request``: Emitted when Transmission sends a DHT requests to one of
     the nodes in its DHT routing table.
     - ``peer-address``, ``peer-port``: As for connection-start.
     - ``peer-id``: The DHT ID of the peer to which the DHT request is sent.
     - ``rpc-type``: The type of DHT request sent. One of (*find_node*,
       *get_peers*, *announce_peer*).
-  ``dht-rpc-reply``: Emitted when Transmission receives a reply to a DHT request
+  - ``dht-rpc-reply``: Emitted when Transmission receives a reply to a DHT request
     described by a ``dht-rpc-request`` event.
     - ``peer-address``, ``peer-port``, ``peer-id``, ``rpc-type``: As above.
-  ``dht-add-node``: Emitted when Transmission adds a new peer to its DHT routing
+  - ``dht-add-node``: Emitted when Transmission adds a new peer to its DHT routing
     table.
     - ``peer-address``, ``peer-port``, ``peer-id``: As above.
-  ``dht-displace-node``: Emitted when Transmission removes a peer from its DHT
+  - ``dht-displace-node``: Emitted when Transmission removes a peer from its DHT
     routing table to make room for a new entry.
     - ``peer-address``, ``peer-port``, ``peer-id``: Details of the removed peer.
-  ``dht-own-id``: At the start of a Transmission run, is emitted to describe the
+  - ``dht-own-id``: At the start of a Transmission run, is emitted to describe the
     user's own DHT ID.
-    ``peer-id``: The user's own DHT ID.
+    - ``peer-id``: The user's own DHT ID.
 
 Each ``connection-end`` event should be associated with a corresponding
 ``connection-start`` event, but not vice versa: there can be ``connection-start``
