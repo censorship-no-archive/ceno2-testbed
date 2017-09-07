@@ -82,7 +82,7 @@ tunnel):
   {"addr": "1.2.3.4",  // a normal IP address, no start or stop needed
    "start": "true", "stop": "true"},
   {"addr": "fc12:3456:...:abcd",  // an address provided by a service
-   "start": "service cjdns restart", "stop": "true"},
+   "start": "service cjdns start", "stop": "service cjdns stop"},
   {"addr": "10.0.0.1",  // a temporary tunnel
    "start": "tnl start ovpn 5.6.7.8 443",
    "stop": "tnl stop $(cat $TNL_START_OUT)"}

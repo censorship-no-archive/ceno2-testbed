@@ -3,6 +3,12 @@
 # Also avoid publishing them
 # to avoid giving away information that would ease blocking external resources.
 
+# Set to true to put the testbed in dormant state,
+# where minimal VPN connectivity is provided
+# and the execution of tests is disabled.
+# Nodes still report and run the maintenance script periodically.
+dormant: false
+
 # When to run the different OONI-based tests.
 op_schedule:
   # This test will run at the given *local* times.

@@ -237,8 +237,8 @@ to see if the *Folder Path* corresponds to an existing folder and that its
   - Tor (permanent): without bridges by default, but you can can
     [configure them](#setting-new-tor-bridges)
   - OnionCat (uses Tor actually, so no extra traffic)
-  - cjdns (permanent): a VPN with encrypted/authenticated UDP traffic from a
-    port that depends on the VM towards port that depends on the server
+  - cjdns (in active testbeds): a VPN with encrypted/authenticated UDP traffic
+    from a port that depends on the VM towards port that depends on the server
   - OpenVPN (for short periods): towards server TCP port 443
   - SSH (for short periods): towards server TCP port 22 (for PPP)
   - SSL (for short periods): towards server TCP port 443 (for PPP)

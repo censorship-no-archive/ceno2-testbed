@@ -74,6 +74,13 @@ initial deployment, like pushing hotfixes and downloading and applying
 a node.  When downloading the script, nodes also report their local, VPN and
 public IP addresses to servers for management purposes.
 
+The Ansible configuration can be used to put the testbed into *dormant state*,
+in which minimal VPN connectivity is provided and the execution of tests is
+disabled so that nodes have very low resource requirements.  Nodes still
+periodically report their addresses and run the maintenance script, which allows
+to use Ansible to bring the testbed back from dormant state into active state so
+that tests can run again.
+
 ### The simulator
 
 We have also developed a simple [simulator][].  Its main purpose is to reproduce
