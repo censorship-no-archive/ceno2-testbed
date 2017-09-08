@@ -434,6 +434,55 @@ Use 1 if you have not yet installed any upgrade yet.  To upgrade:
     ln -s ooni-backend-eq.$NEXT ooni-backend-eq
     systemctl --user start oonib
 
+## Other requirements for tests
+
+### dCDN injector
+
+Some OONI tests using the dCDN network need that there are some external
+injectors running on it.  Given the completely decentralized, P2P nature of
+dCDN, you may run an injector in any computer as long as it has a public IP.
+
+To build the injector, install the required packages, get the testing branch
+source via Git and run the build script:
+
+    sudo apt install git automake libtool make g++ clang libc++-dev libblocksruntime-dev
+    git clone --branch test-cache --recursive https://github.com/inetic/dcdn
+    cd dcdn
+    ./build.sh
+    sudo install injector /usr/local/bin/dcdn-injector
+
+To run the injector on port 7070 of a particular address 192.0.2.1 of your
+server, using hash salt `SOME_STRING`, create the following Systemd unit file
+at `/etc/systemd/system/dcdn-injector.service`:
+
+    [Unit]
+    Description=dCDN injector
+    After=network.target
+
+    [Service]
+    WorkingDirectory=/tmp
+    ExecStartPre=/sbin/iptables -I INPUT ! -i lo -p tcp -m tcp --dport 7070 -j REJECT
+    ExecStart=/usr/local/bin/dcdn-injector -s 192.0.2.1 -p 7070 -t SOME_STRING
+    ExecStopPost=/sbin/iptables -D INPUT ! -i lo -p tcp -m tcp --dport 7070 -j REJECT
+    Restart=always
+    User=nobody
+    Group=nogroup
+    PermissionsStartOnly=true
+
+    [Install]
+    WantedBy=default.target
+
+The `iptables` commands set up a firewall rule while the injector is running
+to avoid outside connections to the debug TCP port.  Please make sure that the
+port number in all `Exec` lines is the same and that you use your own hash
+salt string to avoid clashing with main dCDN users.  The service is
+automatically restarted in case of a crash.
+
+To enable and start it, run:
+
+    sudo systemctl enable dcdn-injector
+    sudo systemctl start dcdn-injector
+
 ## Administrative tools
 
 ### Testbed administration script
