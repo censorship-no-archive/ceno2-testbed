@@ -407,8 +407,8 @@ The test report includes the following fields:
 : A message string indicating whether a peer was provided by the helper, whether
 the peer is new, and its IP address and port.
 
-This test is being run daily in the testbed and it reports as
-``base_tcp_test``.
+This test is being run daily in the testbed and it reports as ``peer_locator``.
+In old versions (before June 2017) it reported as ``base_tcp_test``.
 
 ### Peer HTTP reachability test
 
