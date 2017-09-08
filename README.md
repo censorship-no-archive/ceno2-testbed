@@ -391,8 +391,10 @@ This test is currently not used by the testbed.
 The ``peer_locator_test`` net test contacts a custom given ``peer-locator``
 helper running in a collector server to detect and remember data about what P2P
 test services other nodes (*peers*) are running.  Currently two kinds of
-services (*protocols*) are supported: HTTP and dCDN.  The data and operations
-performed by the test depend on the chosen protocol.
+services (*protocols*) are supported: HTTP and [dCDN][].  The data and
+operations performed by the test depend on the chosen protocol.
+
+[dCDN]: https://clostra.github.io/dcdn/
 
 For HTTP, the test starts a simple test HTTP server (UPnP-enabled if behind NAT)
 which provides a big binary file as its root document.  For dCDN, the test
