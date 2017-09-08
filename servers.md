@@ -320,6 +320,8 @@ Copy `oonib.conf.example` to `oonib.conf` and edit it. Assuming the user running
     - `{type: onion, hsdir: /home/ooni/oonibackend_hidden_services/collector}`
 - `port` for all helpers should be set to `null` to deactivate them, except for
   `peer-locator` and `nat-detection` (main and alternate endpoints).
+- The section `web-uuid2page` must have one `endpoint` with a list with single
+  entry `{type: tcp, port: 57010}`.
 
 You may need to edit the file `data/policy.yaml` to make sure that the tests
 names and versions as sent by the probes will be accepted by the backend. A HTTP
