@@ -389,26 +389,36 @@ This test is currently not used by the testbed.
 ### Peer locator test
 
 The ``peer_locator_test`` net test contacts a custom given ``peer-locator``
-helper running in a collector server to detect and remember the addresses where
-other nodes (*peers*) are running test HTTP servers.
+helper running in a collector server to detect and remember data about what P2P
+test services other nodes (*peers*) are running.  Currently two kinds of
+services (*protocols*) are supported: HTTP and dCDN.  The data and operations
+performed by the test depend on the chosen protocol.
 
-The test (i) starts a simple test HTTP server (UPnP-enabled if behind NAT) which
-provides a big binary file as its root document, (ii) it connects to the helper
-and provides the TCP port number where the HTTP server listens, an indication of
-the protocol it uses (HTTP) and other flags (which include whether NAT is used
-or not).  The helper remembers (with a time stamp) these parameters along with
-the peer's IP address, and (iii) provides back to the test a random entry of one
-of the peers that queried the helper before.  The test keeps a list of all such
+For HTTP, the test starts a simple test HTTP server (UPnP-enabled if behind NAT)
+which provides a big binary file as its root document.  For dCDN, the test
+generates a unique URL from a given prefix and commands a local dCDN client to
+retrieve and cache it (the URL usually points to a ``web-uuid2page`` helper also
+running in the collector server).
+
+Afterwards, the test connects to the helper and provides the port number where
+the HTTP server or dCDN client listens, an indication of the protocol it uses
+and other flags (which include whether NAT is used or not).  For dCDN it also
+reports the cached URL.
+
+The helper remembers (with a time stamp) these parameters along with the peer's
+IP address, and then provides back to the test a random entry of one of the
+other peers that queried the helper before.  The test keeps a list of all such
 discovered peers in ``/root/peer_list.txt``.
 
 The test report includes the following fields:
 
 ``status``
 : A message string indicating whether a peer was provided by the helper, whether
-the peer is new, and its IP address and port.
+the peer is new, and its information.
 
-This test is being run daily in the testbed and it reports as ``peer_locator``.
-In old versions (before June 2017) it reported as ``base_tcp_test``.
+This test is being run daily for HTTP in the testbed and it reports as
+``peer_locator``.  In old versions (before June 2017) it reported as
+``base_tcp_test``.
 
 ### Peer HTTP reachability test
 
