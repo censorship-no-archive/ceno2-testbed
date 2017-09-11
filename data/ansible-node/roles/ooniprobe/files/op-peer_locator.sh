@@ -11,6 +11,14 @@ for BACKEND in $PROBE_BACKENDS; do
   python -m ooni.scripts.ooniprobe -n "$TEST_FILE" \
       --backend="$BACKEND" \
       --peer_list="$PROBE_PEERLIST" \
+      --protocol=http \
       --http_port=random \
+      "$@"
+
+  python -m ooni.scripts.ooniprobe -n "$TEST_FILE" \
+      --backend="$BACKEND" \
+      --peer_list="$PROBE_PEERLIST" \
+      --protocol=dcdn \
+      --dcdn_port="$DCDN_PROXY_PORT" \
       "$@"
 done

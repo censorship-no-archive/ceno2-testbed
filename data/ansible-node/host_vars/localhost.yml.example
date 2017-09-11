@@ -27,6 +27,11 @@ op_schedule:
 # URLs which just report the visiting IP address as text.
 ip4_guessing_url: ['https://myipaddress.example/', 'http://whoami.example/']
 
+# dCDN parameters
+dcdn:
+  # The port where the local dCDN client listens for HTTP proxy connections.
+  proxy_port: 8006  # used by dCDN client by default
+
 # The port where the OONI collector listens (hopefully over some VPN or tunnel).
 tnl_ooni_collector_port: 12345
 
