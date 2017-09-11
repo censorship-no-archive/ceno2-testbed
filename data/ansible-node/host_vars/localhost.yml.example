@@ -30,7 +30,7 @@ ip4_guessing_url: ['https://myipaddress.example/', 'http://whoami.example/']
 # The port where the OONI collector listens (hopefully over some VPN or tunnel).
 tnl_ooni_collector_port: 12345
 
-# The IP+PORT where the OONI HTTP peer locator helper listens.
+# The IP+PORT where the OONI peer locator helper listens.
 # This must be a clearnet or the reporting of peers will not work.
 ooni_peerlocator_helper: ['192.0.2.1:56789']
 
