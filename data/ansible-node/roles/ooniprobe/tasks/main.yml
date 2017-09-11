@@ -159,6 +159,7 @@
   with_items:
     - op-peer_locator.sh
     - op-peer_http_reachable.sh
+    - op-peer_dcdn_request.sh
     - op-p2p_bittorrent.sh
     - op-nat_detection.sh
 
@@ -189,6 +190,22 @@
     disabled: "{{dormant}}"
     hour: "{{op_schedule.peer_http_reachable.hour|default('*')}}"
     minute: "{{op_schedule.peer_http_reachable.minute|default('*')}}"
+    user: root
+
+- name: Set UTC time condition for peer_dcdn_request OONI test
+  set_fact:
+    peer_dcdn_request_condition: "[ $(date -u +\\%H\\%M) = {{op_schedule.peer_dcdn_request.fixed_utc}} ] && "
+  when: op_schedule.peer_dcdn_request.fixed_utc is defined
+
+- name: Set cron task for dcdn request test
+  cron:
+    name: ooniprobe dcdn request
+    job: "{{peer_dcdn_request_condition|default('')}}/usr/local/bin/op-peer_dcdn_request.sh"
+    cron_file: ooniprobe_dcdn_request
+    state: present
+    disabled: "{{dormant}}"
+    hour: "{{op_schedule.peer_dcdn_request.hour|default('*')}}"
+    minute: "{{op_schedule.peer_dcdn_request.minute|default('*')}}"
     user: root
 
 - name: Set UTC time condition for p2p_bittorrent OONI test

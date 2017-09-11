@@ -15,6 +15,10 @@ op_schedule:
   peer_http_reachable:
     hour: "3,11,19"  # exact hours, 8 hours apart here
     minute: 42  # exact minute
+  # This test will run at the given *local* times.
+  peer_dcdn_request:
+    hour: "3,11,19"  # exact hours, 8 hours apart here
+    minute: 32  # exact minute
   # This test will run at the same UTC time in all nodes (if their clock is on time).
   p2p_bittorrent:
     fixed_utc: '2332'  # at 23:32 UTC
