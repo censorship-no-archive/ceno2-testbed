@@ -1,0 +1,31 @@
+---
+
+- name: Create dCDN user
+  user:
+    name: dcdn
+    comment: dCDN test user
+
+- name: Install dependencies of dCDN service
+  apt: pkg={{item}} state=installed
+  with_items:
+    - iptables
+
+# XXXX TODO: build dCDN client binary
+
+- name: Install dCDN client service
+  template:
+    src: dcdn-client.service.j2
+    dest: /etc/systemd/system/dcdn-client.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Enable dCDN client service
+  service: name=dcdn-client enabled=true
+  when: not dormant
+  notify:
+    - Restart dCDN client
+
+- name: Disable and stop dCDN client service on a dormant testbed
+  service: name=dcdn-client enabled=false state=stopped
+  when: dormant

@@ -1,0 +1,5 @@
+---
+
+- name: Restart dCDN client
+  service: name=dcdn-client state=restarted
+  when: not dormant

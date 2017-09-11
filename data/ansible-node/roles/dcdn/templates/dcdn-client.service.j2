@@ -1,0 +1,15 @@
+[Unit]
+Description=dCDN client (indirect)
+After=network.target
+
+[Service]
+WorkingDirectory=~
+ExecStartPre=/sbin/iptables -I INPUT ! -i lo -p tcp -m tcp --dport {{dcdn.proxy_port}} -j REJECT
+ExecStart=/home/dcdn/dcdn-git/client -n -p {{dcdn.proxy_port}} -t {{dcdn.salt}}
+ExecStopPost=/sbin/iptables -D INPUT ! -i lo -p tcp -m tcp --dport {{dcdn.proxy_port}} -j REJECT
+Restart=always
+User=dcdn
+PermissionsStartOnly=true
+
+[Install]
+WantedBy=default.target

@@ -33,6 +33,10 @@ ip4_guessing_url: ['https://myipaddress.example/', 'http://whoami.example/']
 
 # dCDN parameters
 dcdn:
+  # A string shared by all your dCDN test network participants (injectors, clients)
+  # to avoid clashing with main dCDN users and other test networks.
+  # Please always change to your own!
+  salt: "YOUR OWN dCDN NETWORK SALT"
   # The port where the local dCDN client listens for HTTP proxy connections.
   proxy_port: 8006  # used by dCDN client by default
 
