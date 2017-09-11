@@ -20,5 +20,6 @@ for BACKEND in $PROBE_BACKENDS; do
       --peer_list="$PROBE_PEERLIST" \
       --protocol=dcdn \
       --dcdn_port="$DCDN_PROXY_PORT" \
+      --dcdn_url="$DCDN_URL_PREFIX" \
       "$@"
 done
