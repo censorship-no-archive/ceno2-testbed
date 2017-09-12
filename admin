@@ -5,6 +5,7 @@ TB_WEB_ACCESS_LOG=${TB_WEB_ACCESS_LOG:-/var/log/nginx/vhost-server.testbed/acces
 TB_OONI_DATA=${TB_OONI_DATA:-/home/ooni/data}
 TB_ADMIN_SSH_ID=${TB_ADMIN_SSH_ID:-$HOME/testbed/id_rsa}
 TB_PSSH_SSH_OPTS="${TB_PSSH_SSH_OPTS:--o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -i $TB_ADMIN_SSH_ID}"
+TB_CONVERTED_OONI_JSON_DIR=${TB_CONVERTED_OONI_JSON_DIR:-/home/ooni/converted-test-results}
 
 
 # Make date handling safe.
@@ -66,6 +67,26 @@ data_pack() {
     fi
 
     rm -rf "$tmp"
+}
+
+convert_ooni_json() {
+    local indir="$TB_OONI_DATA/archive"
+    local outdir=$TB_CONVERTED_OONI_JSON_DIR
+    local p2p_test_string="p2p_bittorrent_test"
+    local http_test_string="http_reachability_test"
+    local nat_test_string="nat_detection_test"
+
+    mkdir -p "${outdir}"
+
+    # Start with P2P…
+    for ipath in "${indir}"/*-${p2p_test_string}-*; do
+        fname=$(basename "$ipath")
+        opath="${outdir}/${fname}"
+        if [ ! -f "${opath}" ]; then
+            jq -cSM '(.test_keys.commands[0].command_stdout | fromjson)[] as $e | ($e|del(.type)) + {"event-type": $e.type} + (.test_keys.commands[0] | del(.command_stdout)) + (. | del(.test_keys, .annotations, .measurement_start_time, .test_start_time, .test_helpers, .input_hashes, .options, .id, .input))' "${ipath}" >"${opath}"
+        fi
+    done
+
 }
 
 
