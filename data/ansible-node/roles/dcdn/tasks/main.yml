@@ -23,13 +23,20 @@
     repo: https://github.com/inetic/dcdn
     dest: /home/dcdn/dcdn-git
     version: f97284bca415cc012fff0e94d420fc2dde8cc307
-  notify:
-    - Restart dCDN client
+  register: dcdngit
+
+- name: Check if dCDN client binary is present
+  command: /home/dcdn/dcdn-git/client --help
+  register: dcdncli
+  ignore_errors: True
 
 - name: Build dCDN
   command: ./build.sh
   args:
     chdir: /home/dcdn/dcdn-git
+  when: "dcdncli.rc == 127 or dcdngit.before != dcdngit.after"
+  notify:
+    - Restart dCDN client
 
 - name: Install dCDN client service
   template:
