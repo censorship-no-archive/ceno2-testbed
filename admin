@@ -94,7 +94,7 @@ cmd="$1"
 test "$cmd" && shift
 
 case "$cmd" in
-    (nodes_history|nodes_addrs|nodes_cjdns_addrs|nodes_ocat_addrs|nodes_exec|data_pack)
+    (nodes_history|nodes_addrs|nodes_cjdns_addrs|nodes_ocat_addrs|nodes_exec|data_pack|convert_ooni_json)
         $cmd "$@"
         ;;
     (*) echo "Usage: $(basename "$0") nodes_history|nodes_addrs|nodes_cjdns_addrs|nodes_ocat_addrs|nodes_exec|data_pack ARG..." >&2  ##XXXX enhance
