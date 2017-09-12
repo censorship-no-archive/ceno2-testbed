@@ -75,9 +75,6 @@ convert_ooni_json() {
     local p2p_test_string="p2p_bittorrent_test"
     local http_test_string="http_reachability_test"
     local nat_test_string="nat_detection_test"
-    local p2p_ok=0 p2p_fail=0 p2p_ign=0
-    local http_ok=0 http_fail=0 http_ign=0
-    local nat_ok=0 nat_fail=0 nat_ign=0
 
     mkdir -p "${outdir}"
 
@@ -88,9 +85,6 @@ convert_ooni_json() {
         if [ ! -f "${opath}" ]; then
             # Note: some files seem to randomly fail
             jq -c -S -M '(.test_keys.commands[0].command_stdout | fromjson)[] as $e | ($e|del(.type)) + {"event-type": $e.type} + (.test_keys.commands[0] | del(.command_stdout)) + (. | del(.test_keys, .annotations, .measurement_start_time, .test_start_time, .test_helpers, .input_hashes, .options, .id, .input))' "${ipath}" >"${opath}"
-            if [ $? = 0 ]; then ((p2p_ok++)); else ((p2p_fail++)); fi
-        else
-            ((p2p_ign++))
         fi
     done
 
@@ -100,9 +94,6 @@ convert_ooni_json() {
         opath="${outdir}/${fname}"
         if [ ! -f "${opath}" ]; then
             jq -c -S -M '(.test_keys.requests | foreach .[] as $e (0; . + 1; $e + {"attempt": .})) as $r | ($r | reduce paths(scalars) as $path({}; . + {($path | map(tostring) | join("_") | ascii_downcase): $r | getpath($path)})) + (.test_keys | del(.requests, .socksproxy, .agent, .peer_ts)) + {"timestamp": .test_keys.peer_ts} + (. | del(.test_keys, .annotations, .measurement_start_time, .test_start_time, .test_helpers, .input_hashes, .options, .id, .input))' "${ipath}" >"${opath}"
-            if [ $? = 0 ]; then ((http_ok++)); else ((http_fail++)); fi
-        else
-            ((http_ign++))
         fi
     done
 
@@ -112,15 +103,8 @@ convert_ooni_json() {
         opath="${outdir}/${fname}"
         if [ ! -f "${opath}" ]; then
             jq -c -S -M '(.test_keys.data_received[] as $d | ($d | del(.source_addr, .time_first)) + {"timestamp": $d.time_first, "remote_ip": $d.source_addr.host, "remote_port": $d.source_addr.port}) + { "alt_remotes": [ .test_keys.alt_remotes[] as {host: $h, port: $p} | $h + ":" + ($p | tostring) ] | sort, "remotes": [ .test_keys.remotes[] as {host: $h, port: $p} | $h + ":" + ($p | tostring) ] | sort, "local_ip": .test_keys.source_addr.host, "local_port": .test_keys.source_addr.port, "nat_type": .test_keys.nat_type | split(" ") } + (.test_keys | del(.source_addr, .data_received, .remotes, .alt_remotes, .nat_type)) + (. | del(.test_keys, .options, .annotations, .input_hashes, .test_helpers, .measurement_start_time, .test_start_time, .id, .input, .socksproxy, .agent))' "${ipath}" >"${opath}"
-            if [ $? = 0 ]; then ((nat_ok++)); else ((nat_fail++)); fi
-        else
-            ((nat_ign++))
         fi
     done
-
-    echo "P2P: $p2p_ok pass, $p2p_fail fail, $p2p_ign ignored"
-    echo "HTTP: $http_ok pass, $http_fail fail, $http_ign ignored"
-    echo "NAT: $nat_ok pass, $nat_fail fail, $nat_ign ignored"
 }
 
 
