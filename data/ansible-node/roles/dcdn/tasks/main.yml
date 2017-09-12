@@ -8,9 +8,28 @@
 - name: Install dependencies of dCDN service
   apt: pkg={{item}} state=installed
   with_items:
+    - git
+    - automake
+    - libtool
+    - make
+    - g++
+    - clang
+    - libc++-dev
+    - libblocksruntime-dev
     - iptables
 
-# XXXX TODO: build dCDN client binary
+- name: Fetch dCDN source via Git
+  git:
+    repo: https://github.com/inetic/dcdn
+    dest: /home/dcdn/dcdn-git
+    version: f97284bca415cc012fff0e94d420fc2dde8cc307
+  notify:
+    - Restart dCDN client
+
+- name: Build dCDN
+  command: ./build.sh
+  args:
+    chdir: /home/dcdn/dcdn-git
 
 - name: Install dCDN client service
   template:
