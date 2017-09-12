@@ -55,3 +55,6 @@
 - name: Disable and stop dCDN client service on a dormant testbed
   service: name=dcdn-client enabled=false state=stopped
   when: dormant
+
+- name: Set daily Cron task for cleanup of dCDN cached files
+  copy: src=op-dcdn-cache-cleanup.cron-daily dest=/etc/cron.daily/op-dcdn-cache-cleanup owner=root group=root mode=0755

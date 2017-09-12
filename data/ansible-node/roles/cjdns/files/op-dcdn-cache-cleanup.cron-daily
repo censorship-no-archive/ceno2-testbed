@@ -1,0 +1,7 @@
+#!/bin/sh
+# Clean dCDN cache from files older than a week.
+
+find ~dcdn/cache -mtime +8 -type f | xargs rm
+if service dcdn-client status > /dev/null; then
+    service dcdn-client restart
+fi
