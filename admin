@@ -83,7 +83,7 @@ convert_ooni_json() {
         fname=$(basename "$ipath")
         opath="${outdir}/${fname}"
         if [ ! -f "${opath}" ]; then
-            jq -cSM '(.test_keys.commands[0].command_stdout | fromjson)[] as $e | ($e|del(.type)) + {"event-type": $e.type} + (.test_keys.commands[0] | del(.command_stdout)) + (. | del(.test_keys, .annotations, .measurement_start_time, .test_start_time, .test_helpers, .input_hashes, .options, .id, .input))' "${ipath}" >"${opath}"
+            jq -c -S -M '(.test_keys.commands[0].command_stdout | fromjson)[] as $e | ($e|del(.type)) + {"event-type": $e.type} + (.test_keys.commands[0] | del(.command_stdout)) + (. | del(.test_keys, .annotations, .measurement_start_time, .test_start_time, .test_helpers, .input_hashes, .options, .id, .input))' "${ipath}" >"${opath}"
         fi
     done
 
