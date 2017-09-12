@@ -83,8 +83,8 @@ convert_ooni_json() {
         fname=$(basename "$ipath")
         opath="${outdir}/${fname}"
         if [ ! -f "${opath}" ]; then
-            # Note: some files seem to randomly fail
-            $JQ -c -S -M '(.test_keys.commands[0].command_stdout | fromjson)[] as $e | ($e|del(.type)) + {"event-type": $e.type} + (.test_keys.commands[0] | del(.command_stdout)) + (. | del(.test_keys, .annotations, .measurement_start_time, .test_start_time, .test_helpers, .input_hashes, .options, .id, .input))' "${ipath}" >"${opath}"
+            # Note: we eliminate any file where P2P output contains '(null)'
+            $JQ -c -S -M '(.test_keys.commands[0].command_stdout|sub("^$"; "{}")|sub(".*(null).*"; "{}"; "m")|fromjson)[] as $e | ($e|del(.type)) + {"event-type": $e.type} + (.test_keys.commands[0] | del(.command_stdout)) + (. | del(.test_keys, .annotations, .measurement_start_time, .test_start_time, .test_helpers, .input_hashes, .options, .id, .input))' "${ipath}" >"${opath}"
         fi
     done
 
