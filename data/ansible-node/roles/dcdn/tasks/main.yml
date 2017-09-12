@@ -22,7 +22,7 @@
   git:
     repo: https://github.com/inetic/dcdn
     dest: /home/dcdn/dcdn-git
-    version: f97284bca415cc012fff0e94d420fc2dde8cc307
+    version: 011a07d1a78f9ae85d836cd981783bfe65f8031b
   register: dcdngit
 
 - name: Check if dCDN client binary is present
