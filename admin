@@ -6,7 +6,7 @@ TB_OONI_DATA=${TB_OONI_DATA:-/home/ooni/data}
 TB_ADMIN_SSH_ID=${TB_ADMIN_SSH_ID:-$HOME/testbed/id_rsa}
 TB_PSSH_SSH_OPTS="${TB_PSSH_SSH_OPTS:--o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -i $TB_ADMIN_SSH_ID}"
 TB_CONVERTED_OONI_JSON_DIR=${TB_CONVERTED_OONI_JSON_DIR:-/home/ooni/converted-test-results}
-JQ=${JQ:-/usr/bin/jq}
+JQ=${JQ:-/usr/bin/jq} # need jq 1.5 !
 
 # Make date handling safe.
 export LC_TIME=C
