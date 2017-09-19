@@ -407,8 +407,8 @@ The test report includes the following fields:
 : A message string indicating whether a peer was provided by the helper, whether
 the peer is new, and its IP address and port.
 
-This test is being run daily in the testbed and it reports as
-``base_tcp_test``.
+This test is being run daily in the testbed and it reports as ``peer_locator``.
+In old versions (before June 2017) it reported as ``base_tcp_test``.
 
 ### Peer HTTP reachability test
 
@@ -465,7 +465,7 @@ run to get a pretty-prined version of the output produced by the test:
 
 The instrumentation collects a record of peer-to-peer network events involved
 in downloading or seeding a torrent file. Together, this information makes it
-possible to reconstruct a log of network activities attempted by the bittorrent
+possible to reconstruct a log of network activities attempted by the BitTorrent
 client, as well as the degree to which these activities succeeded.
 
 The instrumentation record is implemented as a running sequence of network
@@ -475,7 +475,7 @@ event, a ``timestamp`` float UNIX timestamp recording the time of the event, as
 well as a collection of type-specific fields. Seven different types of events
 are recorded:
 
-  - ``connection-start``: Emitted whenever a peer-to-peer bittorrent data
+  - ``connection-start``: Emitted whenever a peer-to-peer BitTorrent data
     transfer connection is attempted. This does not necessarily mean the
     connection gets established successfully.
     - ``peer-address``, ``peer-port``: The IP address and TCP/UDP port of the
@@ -484,12 +484,12 @@ are recorded:
       False otherwise.
     - ``ledbat``: True if the connection is a LEDBAT UDP connection. False
       otherwise.
-  - ``connection-end``: Emitted when a peer-to-peer bittorrent data transfer
+  - ``connection-end``: Emitted when a peer-to-peer BitTorrent data transfer
     connection is closed. This can be a connection closed voluntarily by one of
     its parties after transferring a certain amount of data; a connection closed
     by some network error at any time; or a connection that never got
     established in the first place, which is cancelled by its initiator.
-    - ``peer-address``, ``peer-port``: As for connection-start.
+    - ``peer-address``, ``peer-port``: As for ``connection-start``.
     - ``bytes-sent``, ``bytes-received``: The amount of torrent PAYLOAD data
       transmitted over the connection.
     - ``encrypted``: True if opportunistic protocol encryption was used for this
@@ -499,24 +499,24 @@ are recorded:
     - ``reason-error``: True if the connection get terminated because of some
       network error, such as a connection-reset or a timeout. This generally
       includes connections that get dropped before ever being established.
-  ``dht-rpc-request``: Emitted when Transmission sends a DHT requests to one of
+  - ``dht-rpc-request``: Emitted when Transmission sends a DHT requests to one of
     the nodes in its DHT routing table.
-    - ``peer-address``, ``peer-port``: As for connection-start.
+    - ``peer-address``, ``peer-port``: As for ``connection-start``.
     - ``peer-id``: The DHT ID of the peer to which the DHT request is sent.
     - ``rpc-type``: The type of DHT request sent. One of (*find_node*,
       *get_peers*, *announce_peer*).
-  ``dht-rpc-reply``: Emitted when Transmission receives a reply to a DHT request
+  - ``dht-rpc-reply``: Emitted when Transmission receives a reply to a DHT request
     described by a ``dht-rpc-request`` event.
     - ``peer-address``, ``peer-port``, ``peer-id``, ``rpc-type``: As above.
-  ``dht-add-node``: Emitted when Transmission adds a new peer to its DHT routing
+  - ``dht-add-node``: Emitted when Transmission adds a new peer to its DHT routing
     table.
     - ``peer-address``, ``peer-port``, ``peer-id``: As above.
-  ``dht-displace-node``: Emitted when Transmission removes a peer from its DHT
+  - ``dht-displace-node``: Emitted when Transmission removes a peer from its DHT
     routing table to make room for a new entry.
     - ``peer-address``, ``peer-port``, ``peer-id``: Details of the removed peer.
-  ``dht-own-id``: At the start of a Transmission run, is emitted to describe the
+  - ``dht-own-id``: At the start of a Transmission run, is emitted to describe the
     user's own DHT ID.
-    ``peer-id``: The user's own DHT ID.
+    - ``peer-id``: The user's own DHT ID.
 
 Each ``connection-end`` event should be associated with a corresponding
 ``connection-start`` event, but not vice versa: there can be ``connection-start``

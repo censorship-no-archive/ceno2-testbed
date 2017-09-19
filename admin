@@ -5,7 +5,8 @@ TB_WEB_ACCESS_LOG=${TB_WEB_ACCESS_LOG:-/var/log/nginx/vhost-server.testbed/acces
 TB_OONI_DATA=${TB_OONI_DATA:-/home/ooni/data}
 TB_ADMIN_SSH_ID=${TB_ADMIN_SSH_ID:-$HOME/testbed/id_rsa}
 TB_PSSH_SSH_OPTS="${TB_PSSH_SSH_OPTS:--o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -i $TB_ADMIN_SSH_ID}"
-
+TB_CONVERTED_OONI_JSON_DIR=${TB_CONVERTED_OONI_JSON_DIR:-/home/ooni/converted-test-results}
+JQ=${JQ:-/usr/bin/jq} # need jq 1.5 !
 
 # Make date handling safe.
 export LC_TIME=C
@@ -68,14 +69,54 @@ data_pack() {
     rm -rf "$tmp"
 }
 
+convert_ooni_json() {
+    local indir="$TB_OONI_DATA/archive"
+    local outdir=$TB_CONVERTED_OONI_JSON_DIR
+    local p2p_test_string="p2p_bittorrent_test"
+    local http_test_string="http_reachability_test"
+    local nat_test_string="nat_detection_test"
+
+    mkdir -p "${outdir}/${p2p_test_string}" \
+             "${outdir}/${http_test_string}" \
+             "${outdir}/${nat_test_string}"
+
+    # Start with P2P…
+    for ipath in "${indir}"/*-${p2p_test_string}-*; do
+        fname=$(basename "$ipath")
+        opath="${outdir}/${p2p_test_string}/${fname}"
+        if [ ! -f "${opath}" ]; then
+            # Note: we eliminate any file where P2P output contains '(null)'
+            $JQ -c -S -M '(.test_keys.commands[0].command_stdout|sub("^$"; "{}")|sub(".*(null).*"; "{}"; "m")|fromjson)[] as $e | ($e|del(.type)) + {"event-type": $e.type} + (.test_keys.commands[0] | del(.command_stdout)) + (. | del(.test_keys, .annotations, .measurement_start_time, .test_start_time, .test_helpers, .input_hashes, .options, .id, .input))' "${ipath}" >"${opath}"
+        fi
+    done
+
+    # HTTP reachability test…
+    for ipath in "${indir}"/*-${http_test_string}-*; do
+        fname=$(basename "$ipath")
+        opath="${outdir}/${http_test_string}/${fname}"
+        if [ ! -f "${opath}" ]; then
+            $JQ -c -S -M '(.test_keys.requests | foreach .[] as $e (0; . + 1; $e + {"attempt": .})) as $r | ($r | reduce paths(scalars) as $path({}; . + {($path | map(tostring) | join("_") | ascii_downcase): $r | getpath($path)})) + (.test_keys | del(.requests, .socksproxy, .agent, .peer_ts)) + {"timestamp": .test_keys.peer_ts} + (. | del(.test_keys, .annotations, .measurement_start_time, .test_start_time, .test_helpers, .input_hashes, .options, .id, .input))' "${ipath}" >"${opath}"
+        fi
+    done
+
+    # NAT test…
+    for ipath in "${indir}"/*-${nat_test_string}-*; do
+        fname=$(basename "$ipath")
+        opath="${outdir}/${nat_test_string}/${fname}"
+        if [ ! -f "${opath}" ]; then
+            $JQ -c -S -M '(.test_keys.data_received[] as $d | ($d | del(.source_addr, .time_first)) + {"timestamp": $d.time_first, "remote_ip": $d.source_addr.host, "remote_port": $d.source_addr.port}) + { "alt_remotes": [ .test_keys.alt_remotes[] as {host: $h, port: $p} | $h + ":" + ($p | tostring) ] | sort, "remotes": [ .test_keys.remotes[] as {host: $h, port: $p} | $h + ":" + ($p | tostring) ] | sort, "local_ip": .test_keys.source_addr.host, "local_port": .test_keys.source_addr.port, "nat_type": .test_keys.nat_type | split(" ") } + (.test_keys | del(.source_addr, .data_received, .remotes, .alt_remotes, .nat_type)) + (. | del(.test_keys, .options, .annotations, .input_hashes, .test_helpers, .measurement_start_time, .test_start_time, .id, .input, .socksproxy, .agent))' "${ipath}" >"${opath}"
+        fi
+    done
+}
+
 
 cmd="$1"
 test "$cmd" && shift
 
 case "$cmd" in
-    (nodes_history|nodes_addrs|nodes_cjdns_addrs|nodes_ocat_addrs|nodes_exec|data_pack)
+    (nodes_history|nodes_addrs|nodes_cjdns_addrs|nodes_ocat_addrs|nodes_exec|data_pack|convert_ooni_json)
         $cmd "$@"
         ;;
-    (*) echo "Usage: $(basename "$0") nodes_history|nodes_addrs|nodes_cjdns_addrs|nodes_ocat_addrs|nodes_exec|data_pack ARG..." >&2  ##XXXX enhance
+    (*) echo "Usage: $(basename "$0") nodes_history|nodes_addrs|nodes_cjdns_addrs|nodes_ocat_addrs|nodes_exec|data_pack|convert_ooni_json ARG..." >&2  ##XXXX enhance
         exit 1
 esac
