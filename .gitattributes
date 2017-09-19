@@ -16,3 +16,7 @@ data/ssh/testbed-admin/id_rsa.pub filter=git-crypt diff=git-crypt
 data/ansible-node/roles/ssh/files/authorized_keys filter=git-crypt diff=git-crypt
 data/ansible-node/roles/tnlscripts/files/tnlvars.sh filter=git-crypt diff=git-crypt
 data/ansible-node/host_vars/localhost.yml filter=git-crypt diff=git-crypt
+# Testbed backend servers: elasticsearch interaction
+elasticsearch/ssh/cenolastic-fetcher filter=git-crypt diff=git-crypt
+elasticsearch/ssh/cenolastic-fetcher.pub filter=git-crypt diff=git-crypt
+
