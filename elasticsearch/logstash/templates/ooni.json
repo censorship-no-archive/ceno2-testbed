@@ -1,6 +1,6 @@
 {
   "order": 0,
-  "template": "cenolastic",
+  "template": "ooni",
   "settings": {
     "index.number_of_replicas": 0,
     "index.number_of_shards": 1
