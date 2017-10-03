@@ -85,7 +85,7 @@ check_jq_version () {
     local current=$($JQ --version | sed 's/^jq-//')
     local ret=0
 
-    if [ "$current" < "$minimal" ]; then
+    if [ "$minimal" > "$current" ]; then
       ret=1
       echo jq must be at least version "$minimal" but current version is "$current" >&2
     fi
