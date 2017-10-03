@@ -80,12 +80,27 @@ copy_http_beacon_logs () {
     chown -R "${TB_OONI_USER}": "${outdir}"
 }
 
+check_jq_version () {
+    local minimal=${1:-1.5}
+    local current=$($JQ --version | sed 's/^jq-//')
+    local ret=0
+
+    if [ "$current" < "$minimal" ]; then
+      ret=1
+      echo jq must be at least version "$minimal" but current version is "$current" >&2
+    fi
+
+    return $ret
+}
+
 convert_ooni_json() {
     local indir="$TB_OONI_DATA/archive"
     local outdir=$TB_CONVERTED_OONI_JSON_DIR
     local p2p_test_string="p2p_bittorrent_test"
     local http_test_string="http_reachability_test"
     local nat_test_string="nat_detection_test"
+
+    check_jq_version 1.5 || return
 
     mkdir -p "${outdir}/${p2p_test_string}" \
              "${outdir}/${http_test_string}" \
