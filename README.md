@@ -687,11 +687,20 @@ Install the following files from this repository (see the `elasticsearch/`
 folder):
 
 - `/etc/kibana/kibana.yml`;
-- `/etc/logstash/conf.d/cenolastic.conf`;
+- `/etc/logstash/conf.d/cenolastic.conf` (make sure you adjust the paths to the
+  various data files);
 - `/etc/logstash/templates/ooni.json`;
 - `/etc/logstash/templates/http_beacon.json`;
 - `/etc/nginx/sites-available/elasticsearch` (make sure you edit this file
   and adjust it to your domain name).
+
+Finally, restart the services:
+
+    $ service kibana restart
+    $ service logstash restart
+
+And Logstash should start processing your files and insert data into ES. You can
+start exploring data by connecting to `https://your.domain/dash/`.
 
 <!-- Local Variables: -->
 <!-- fill-column: 80 -->
