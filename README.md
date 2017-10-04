@@ -689,6 +689,7 @@ folder):
 - `/etc/kibana/kibana.yml`;
 - `/etc/logstash/conf.d/cenolastic.conf`;
 - `/etc/logstash/templates/ooni.json`;
+- `/etc/logstash/templates/http_beacon.json`;
 - `/etc/nginx/sites-available/elasticsearch` (make sure you edit this file
   and adjust it to your domain name).
 
