@@ -658,6 +658,19 @@ the script to a different one.
 For a continuous pipeline, it is a good idea to add a call to this script
 regularly with `cron`.
 
+### Adding HTTP beacons sent by probes
+
+Besides OONI JSON data, the testbed collector includes a web server that
+receives HTTP beacons sent by probes regularly. They simply consist in `nginx`
+HTTP log files.
+
+The admin script will simply copy the relevant log file from its source
+directory to the target directory along with the JSON OONI files.
+
+Make sure the environment variable `TB_WEB_ACCESS_LOG` is properly set, as well
+as `TB_CONVERTED_OONI_JSON_DIR` and `JQ`, then run the admin script with
+`copy_http_beacon_logs` as sole argument.
+
 ### ELK installation and setup
 
 These instructions are for Debian, and were tested on Jessie.
@@ -688,7 +701,7 @@ folder):
 
 - `/etc/kibana/kibana.yml`;
 - `/etc/logstash/conf.d/cenolastic.conf` (make sure you adjust the paths to the
-  various data files);
+  various data files, as converted and copied by the admin script as show above);
 - `/etc/logstash/templates/ooni.json`;
 - `/etc/logstash/templates/http_beacon.json`;
 - `/etc/nginx/sites-available/elasticsearch` (make sure you edit this file
