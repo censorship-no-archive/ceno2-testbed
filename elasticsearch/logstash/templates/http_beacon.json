@@ -1,0 +1,25 @@
+{
+  "order": 0,
+  "template": "http_beacon",
+  "settings": {
+    "index.number_of_replicas": 0,
+    "index.number_of_shards": 1
+  },
+  "mappings": {
+    "http_beacon": {
+      "properties": {
+        "agent": { "type": "text" },
+        "auth": { "type": "keyword" },
+        "bytes": { "type": "long" },
+        "clientip": { "type": "ip" },
+        "httpversion": { "type": "float" },
+        "method": { "type": "keyword" },
+        "referrer": { "type": "text" },
+        "request": { "type": "text" },
+        "response": { "type": "integer" },
+        "@timestamp": { "type": "date", "format": "date_optional_time" },
+        "@version": { "type": "short" }
+      }
+    }
+  }
+}
