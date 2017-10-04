@@ -651,6 +651,12 @@ To run the translation, proceed as follows:
 3. if necessary, set `JQ` environment to the appropriate `jq` binary;
 4. run the admin script with `convert_ooni_json` as first and only argument.
 
+The script will not re-convert files if the target files already exist. In order
+to force re-conversion of all files, simply remove the target directory.
+
+For a continuous pipeline, it is a good idea to add a call to this script
+regularly with `cron`.
+
 <!-- Local Variables: -->
 <!-- fill-column: 80 -->
 <!-- End: -->
