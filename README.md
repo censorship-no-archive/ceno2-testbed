@@ -573,6 +573,84 @@ full description of all fields.
 This test is being run every 8 hours in the testbed and it reports as
 ``nat_detection_test``.
 
+## Using ElasticSearch to visualise test results
+
+The amount of data collected by the OONI tests mentioned above may not be
+practical to look at and analyse by simply looking at the JSON files produced by
+the tests.
+
+It is possible to build a simple pipeline to insert this data into ElasticSearch
+(ES), through Logstash, and make it observable with Kibana. This triplet is
+commonly abbreviated "[ELK](https://www.elastic.co/)".
+
+The overall pipeline to process the data into ES for the testbed is as follows:
+
+1. data is generated on probes;
+2. data is sent to the collector;
+3. data is translated into a structure suitable for ElasticSearch (mostly:
+   nested structures are flattened), which produces a new set of JSON files
+   containing the translated data;
+3. optionally, translated data files are transferred to a machine dedicated to
+   run ELK;
+4. transformed data is read by Logstash and inserted into ElasticSearch, and
+   ready to be consulted via Kibana.
+
+### Why the data is translated
+
+ElasticSearch deals best with time-based series of events, with events of
+identical nature having identical properties. For instance, each single result
+of a P2P test actually includes several events (connection to a peer, request to
+the DHT…), and they must therefore be explicitly separated into distinct JSON
+objects whose properties will be taken from the initial data.
+
+Besides, Kibana does not handle nested data structures properly. Therefore,
+simple events that do not need to be broken down into multiple events (like the
+P2P test) still have OONI-specific data structures that need to be flattened.
+
+After translation, each event is a simple JSON object without nesting.
+
+### How the data is translated
+
+Within one run of the NAT detection test, the probe is likely to receive several
+UDP packets from the NAT detection helpers. The translation consists in
+exploding the OONI test object into one ElasticSearch event for each packet of
+data received by the probe. Each event corresponding to that one OONI test run
+will still share some properties' values, like `test_id`, that are common to the
+whole OONI test run.
+
+A P2P test outputs its results to standard output as a JSON string, which OONI
+serialises into a string variable in the JSON object representing the test
+result. The translation first deserialises the string back into JSON, and then
+explodes the multiple P2P events it contains into individual ES events. In
+addition, out of a (eventually unfounded) doubt that ES may not properly handle
+field names containing hyphens, they are translated into underscores.
+
+Each HTTP reachability test also contains several events, as the probe tries to
+contact several peers. Additionally, contacting a given peer may lead to several
+attempts in case of failure. Out of the OONI data, each connection attempt
+yields an individual ES event. Different attempts at contacting the same peer
+within the same OONI test run are timestamped with the same value, but are
+differenciated with an added `attempt` field.
+
+The exact `jq` commands for these translations are in the `admin` script, should
+you want to look at them.
+
+### Running the data translation
+
+`jq` in version at least 1.5 is required. On Debian Jessie, you can download a
+precompiled static binary from the [official
+website](https://stedolan.github.io/jq/) and install it to `/usr/local/bin/`,
+since the packaged version is older than 1.5.
+
+To run the translation, proceed as follows:
+
+1. make sure the environment `TB_OONI_DATA` is set properly to the folder
+   containing OONI data test results on the collector;
+2. set environment `TB_CONVERTED_OONI_JSON_DIR` to the directory you want the
+   translated output to;
+3. if necessary, set `JQ` environment to the appropriate `jq` binary;
+4. run the admin script with `convert_ooni_json` as first and only argument.
+
 <!-- Local Variables: -->
 <!-- fill-column: 80 -->
 <!-- End: -->
