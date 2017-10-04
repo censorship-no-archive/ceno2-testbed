@@ -652,10 +652,45 @@ To run the translation, proceed as follows:
 4. run the admin script with `convert_ooni_json` as first and only argument.
 
 The script will not re-convert files if the target files already exist. In order
-to force re-conversion of all files, simply remove the target directory.
+to force re-conversion of all files, simply remove the target directory or point
+the script to a different one.
 
 For a continuous pipeline, it is a good idea to add a call to this script
 regularly with `cron`.
+
+### ELK installation and setup
+
+These instructions are for Debian, and were tested on Jessie.
+
+Install package `apt-transport-https`:
+
+    $ sudo apt-get install apt-transport-https
+
+Make Debian aware of Elastic's PGP key and package repository, then install ELK:
+
+    $ wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+    $ echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
+    $ sudo apt-get update
+    $ sudo apt-get install elasticsearch logstash kibana nginx certbot apache2-utils
+
+Create one or several user accounts in a `htpasswd` file in
+`/etc/nginx/conf.d/htpasswd` and set their password. They will be used to make
+sure external access to Kibana and ElasticSearch is authenticated:
+
+    $ sudo htpasswd /etc/nginx/conf.d/htpasswd my_new_user
+
+Make sure a domain name is associated to your machine hosting ELK, and use for
+instance Let's Encrypt's `certbot` to generate a TLS certificate that `nginx`
+will be able to use.
+
+Install the following files from this repository (see the `elasticsearch/`
+folder):
+
+- `/etc/kibana/kibana.yml`;
+- `/etc/logstash/conf.d/cenolastic.conf`;
+- `/etc/logstash/templates/ooni.json`;
+- `/etc/nginx/sites-available/elasticsearch` (make sure you edit this file
+  and adjust it to your domain name).
 
 <!-- Local Variables: -->
 <!-- fill-column: 80 -->
