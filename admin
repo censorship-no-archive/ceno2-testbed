@@ -70,6 +70,7 @@ data_pack() {
     rm -rf "$tmp"
 }
 
+# Copy the beacon log to a location where it can be read by the OONI user.
 copy_http_beacon_logs () {
     local infile=$TB_WEB_ACCESS_LOG
     local outdir="${TB_CONVERTED_OONI_JSON_DIR}/http_beacon"

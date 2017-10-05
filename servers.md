@@ -466,6 +466,9 @@ beacon log, i.e. show which nodes where available on which days.
 ``data_pack``
 : Pack test results and other files useful for their interpretation.
 
+``copy_http_beacon_logs``
+: Copy the beacon log to a location where it can be read by the OONI user.
+
 Some of these commands use the entries created in the server's web access log
 by [node address reporting](#node-address-reporting-and-remote-maintenance).
 The location of the log file and other parameters can be set as environment
