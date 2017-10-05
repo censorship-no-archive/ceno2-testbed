@@ -95,6 +95,8 @@ check_jq_version () {
     return $ret
 }
 
+# Flatten OONI reports into event-based JSON files
+# and place them in a location where it can be read by the OONI user.
 convert_ooni_json() {
     local indir="$TB_OONI_DATA/archive"
     local outdir=$TB_CONVERTED_OONI_JSON_DIR
