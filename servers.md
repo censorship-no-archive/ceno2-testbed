@@ -453,6 +453,9 @@ i4=NODE_PUB_ADDR`` for each node which reported today.
 ``nodes_cjdns_addrs``
 : Print the cjdns IPv6 address of each node which reported today.
 
+``nodes_ocat_addrs``
+: Print the OnionCat IPv6 address of each node which reported today.
+
 ``nodes_exec COMMAND ARG…``
 : Execute the given command in each node which reported today.
 
