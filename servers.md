@@ -459,6 +459,10 @@ i4=NODE_PUB_ADDR`` for each node which reported today.
 ``nodes_exec COMMAND ARG…``
 : Execute the given command in each node which reported today.
 
+``nodes_history``
+: Print oldest-to-newest list of ``UTC_ISO_DATE NODE_ID`` occurrences in the
+web access log, i.e. show which nodes where available on which days.
+
 ``data_pack``
 : Pack test results and other files useful for their interpretation.
 
