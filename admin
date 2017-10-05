@@ -13,7 +13,7 @@ JQ=${JQ:-/usr/bin/jq} # need jq 1.5 !
 export LC_TIME=C
 
 
-# Print oldest-to-newest list of ``UTC_ISO_DATE NODE_ID`` occurrences in the log,
+# Print oldest-to-newest list of ``UTC_ISO_DATE NODE_ID`` occurrences in the beacon log,
 # i.e. show which nodes where available on which days.
 nodes_history() {
     sudo cat  "$TB_WEB_ACCESS_LOG" \
