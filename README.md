@@ -445,6 +445,32 @@ peer.
 This test is being run every 6 hours in the testbed and it reports as
 ``http_reachability_test``.
 
+#### Visualization
+
+A very simple one which may help assess global P2P reachability:
+
+  - Percentage of successful connections over time.
+
+The following variation may help discern the impact of NAT:
+
+  - Percentage of successful connections over time, grouped by destination peer
+    behind NAT/not behind NAT.
+
+The following variation may help assess the effect of peer age on reachability:
+
+  - Percentage of successful connections over time, grouped by age of
+    destination peer.
+
+More sophisticated variations when many nodes are available:
+
+  - Percentage of successful connections over time, grouped by source peer AS.
+  - Percentage of successful connections over time, grouped by destination peer
+    AS.
+
+This visualization may help detect throttling in P2P connections:
+
+  - Average response time of successful connections over time.
+
 ### P2P BitTorrent test
 
 The ``p2p_bittorrent_test`` net test simply invokes a script that runs an
