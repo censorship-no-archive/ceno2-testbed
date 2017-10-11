@@ -575,11 +575,12 @@ since the packaged version is older than 1.5.
 
 To run the translation, proceed as follows:
 
-1. make sure the environment `TB_OONI_DATA` is set properly to the folder
-   containing OONI data test results on the collector;
-2. set environment `TB_CONVERTED_OONI_JSON_DIR` to the directory you want the
-   translated output to;
-3. if necessary, set `JQ` environment to the appropriate `jq` binary;
+1. make sure the environment variable `TB_OONI_DATA` is set properly to the
+   folder containing OONI data test results on the collector;
+2. set the environment variable `TB_CONVERTED_OONI_JSON_DIR` to the directory
+   you want the translated output to;
+3. if necessary, set the `JQ` environment variable to the appropriate `jq`
+   binary;
 4. run the admin script with `convert_ooni_json` as first and only argument.
 
 The script will not re-convert files if the target files already exist. In order
@@ -632,7 +633,8 @@ folder):
 
 - `/etc/kibana/kibana.yml`;
 - `/etc/logstash/conf.d/cenolastic.conf` (make sure you adjust the paths to the
-  various data files, as converted and copied by the admin script as show above);
+  various data files, as converted and copied by the admin script as shown
+  above);
 - `/etc/logstash/templates/ooni.json`;
 - `/etc/logstash/templates/http_beacon.json`;
 - `/etc/nginx/sites-available/elasticsearch` (make sure you edit this file
@@ -655,7 +657,7 @@ maintenance, related to system configuration and that may or may not happen.
 
 When executing `systemctl --user enable portsplit` as user `portsplit` (or
 similar commands such as when enabling or starting the `oonib` service), you
-might encounter this error message: 
+might encounter this error message:
 
     Failed to get D-Bus connection: Connection refused
 
