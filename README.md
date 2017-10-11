@@ -599,6 +599,17 @@ full description of all fields.
 This test is being run every 8 hours in the testbed and it reports as
 ``nat_detection_test``.
 
+#### Visualization
+
+The simplest visualization consists of just reporting the frequency of each type
+of address mapping and filtering:
+
+  - Percentage of mapping types over time.
+  - Percentage of filtering types over time.
+
+If testing for UPnP was enabled, restricting results to those where UPnP was
+actually active may help visualize 
+
 <!-- Local Variables: -->
 <!-- fill-column: 80 -->
 <!-- End: -->
