@@ -88,8 +88,8 @@ check_jq_version () {
 
     if [ "$minimal" > "$current" ]; then
       ret=1
-      echo jq must be at least version "$minimal" but current version is "$current" >&2
-      echo using path "$JQ", did you set the \$JQ environment variable properly?
+      echo "jq must be at least version $minimal but current version is $current" >&2
+      echo "using path $JQ, did you set the \$JQ environment variable properly?"
     fi
 
     return $ret
